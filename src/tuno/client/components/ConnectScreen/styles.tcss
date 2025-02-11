@@ -1,0 +1,38 @@
+ConnectScreen {
+    align: center middle;
+}
+
+.form-item {
+    width: 40;
+    margin: 1;
+
+    &Input {
+        height: 5;
+        padding: 1 2;
+        border: double $secondary;
+        border-title-color: $text-secondary;
+        background: transparent;
+
+        &:focus {
+            border: double $primary;
+            border-title-color: $text-primary;
+        }
+        &.invalid {
+            border: double $error-muted;
+            border-title-color: $text-error;
+
+            &:focus {
+                border: double $error;
+            }
+        }
+    }
+}
+
+Button#submit {
+    height: 3;
+
+    &:disabled {
+        background: $primary-muted;
+        color: $text-disabled;
+    }
+}

@@ -1,0 +1,21 @@
+LoadingScreen {
+    align: center middle;
+    background: $background 80%;
+
+    #loading-container {
+        width: auto;
+        height: auto;
+        padding: 1 3;
+        background: $boost;
+
+        #loading-message {
+            margin-bottom: 1;
+            width: auto;
+        }
+
+        LoadingIndicator {
+            position: relative;
+            height: auto;
+        }
+    }
+}

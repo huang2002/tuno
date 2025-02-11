@@ -1,0 +1,32 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "UNO Server",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "flask",
+            "env": {
+                "FLASK_APP": "tuno.server",
+                "FLASK_DEBUG": "1",
+                "UNO_LOG_LEVEL": "DEBUG"
+            },
+            "args": ["run", "--no-debugger", "--no-reload"]
+        },
+        {
+            "name": "UNO Client",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "tuno.client",
+            "env": {
+                "UNO_CONNECTION": "vscode@localhost:5000"
+            },
+            "cwd": "${workspaceFolder}/src",
+            "console": "externalTerminal",
+            "justMyCode": false
+        }
+    ]
+}

@@ -1,0 +1,72 @@
+from tuno.shared.constraints import MIN_PLAYER_CAPACITY
+from tuno.shared.deck import BasicCardColor, Card
+
+
+class ApiException(Exception):
+
+    http_code: int
+    message: str
+
+    def __init__(self, http_code: int, message: str) -> None:
+        super().__init__(message)
+        self.http_code = http_code
+        self.message = message
+
+
+class InvalidPlayerNameException(ApiException):
+    def __init__(self, player_name: str) -> None:
+        super().__init__(
+            400,
+            f"Invalid player name: {player_name}",
+        )
+
+
+class PlayerNotFoundException(ApiException):
+    def __init__(self, player_name: str) -> None:
+        super().__init__(
+            400,
+            f"Player not found: {player_name}",
+        )
+
+
+class NewPlayerToStartedGameException(ApiException):
+    def __init__(self, player_name: str) -> None:
+        super().__init__(
+            403,
+            f"Cannot add new player to a started game. ({player_name})",
+        )
+
+
+class GameAlreadyStartedException(ApiException):
+    def __init__(self) -> None:
+        super().__init__(
+            400,
+            "The game has already started.",
+        )
+
+
+class NotEnoughPlayersException(ApiException):
+    def __init__(self) -> None:
+        super().__init__(
+            400,
+            "Not enough players to start the game. "
+            f"(At least {MIN_PLAYER_CAPACITY} players are required.)",
+        )
+
+
+class GameNotStartedException(ApiException):
+    def __init__(self) -> None:
+        super().__init__(
+            400,
+            "The game has not started yet.",
+        )
+
+
+class InvalidLeadCardInfoException(ApiException):
+    def __init__(
+        self, lead_card: Card, lead_color: BasicCardColor | None
+    ) -> None:
+        super().__init__(
+            400,
+            f"Invalid lead card info: {lead_card!r}, {lead_color!r}",
+        )

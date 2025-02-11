@@ -1,0 +1,132 @@
+InGameScreen {
+    layout: grid;
+    grid-size: 2 2;
+    grid-rows: 1fr 7;
+    grid-columns: 25 1fr;
+    grid-gutter: 0 3;
+
+    Sidebar {
+        offset-x: 1;
+    }
+
+    Players, Actions {
+        offset-x: -1;
+    }
+}
+
+Sidebar, Players, Actions {
+    border: double $panel;
+    border-title-color: $text-secondary;
+
+    &:focus {
+        border: double $border;
+        border-title-color: $text-primary;
+    }
+}
+
+Sidebar {
+    row-span: 2;
+    height: 100%;
+    padding: 1 2;
+
+    .sidebar-info-section {
+        width: 100%;
+        content-align-horizontal: center;
+        color: $foreground-muted;
+        border-title-color: $foreground;
+        border-title-align: center;
+        border: solid $surface;
+    }
+
+    #sidebar-info-status {
+        &.started {
+            color: $text-success;
+        }
+        &.pending {
+            color: $text-warning;
+        }
+    }
+
+    #sidebar-info-current-player {
+        color: $foreground-muted;
+
+        &.active {
+            color: $text-success;
+        }
+        &.waiting {
+            color: $text-accent;
+        }
+    }
+}
+
+Players {
+    padding: 1 2;
+    layout: grid;
+    grid-size: 3;
+    grid-rows: 4;
+    grid-gutter: 0 1;
+
+    LoadingIndicator {
+        background: transparent;
+    }
+
+    PlayerCard {
+        height: 4;
+        border: round $panel;
+        padding: 0 1;
+        layout: grid;
+        grid-size: 2 2;
+        grid-rows: 1 1;
+        grid-columns: 2 1fr;
+
+        &.active {
+            border: heavy $success;
+        }
+
+        .player-card-connected {
+            width: 1;
+            color: $foreground-muted;
+
+            &.connected {
+                color: $text-success;
+            }
+            &.disconnected {
+                color: $text-error;
+            }
+        }
+
+        .player-card-name {
+            width: 100%;
+        }
+
+        .player-card-count {
+            column-span: 2;
+            align-horizontal: right;
+
+            .player-card-count-label {
+                color: $foreground-muted;
+            }
+        }
+    }
+}
+
+Actions {
+    padding: 1 2;
+    align: center middle;
+
+    Button {
+        min-width: 11;
+        margin: 0 3;
+    }
+
+    Button#action-show-rules {
+        border-top: tall $secondary-lighten-2;
+        border-bottom: tall $secondary-darken-2;
+        background: $secondary;
+
+        &:hover {
+            background: $secondary-darken-1;
+            border-top: tall $primary;
+        }
+    }
+}

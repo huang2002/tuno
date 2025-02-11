@@ -1,0 +1,5 @@
+black==24.8.0
+isort==6.0.0
+mypy==1.15.0
+textual-dev==1.7.0
+types-requests==2.32.0.20241016

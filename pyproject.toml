@@ -1,0 +1,71 @@
+[project]
+name = "tuno"
+dynamic = ["version", "description", "dependencies", "optional-dependencies"]
+readme = "README.md"
+license = "ISC"
+requires-python = ">=3.12"
+classifiers = [
+    "License :: OSI Approved :: ISC License (ISCL)",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+]
+
+[[project.authors]]
+name = "huang2002"
+email = "huanghaihua2002@qq.com"
+
+[project.scripts]
+tuno = "tuno:tuno"
+
+[build-system]
+requires = [
+    "hatchling",
+    "hatch-docstring-description",
+    "hatch-requirements-txt",
+]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "src/tuno/__init__.py"
+
+[tool.hatch.metadata.hooks.docstring-description]
+path = "src/tuno/__init__.py"
+
+[tool.hatch.metadata.hooks.requirements_txt]
+files = ["requirements.txt"]
+
+[tool.hatch.metadata.hooks.requirements_txt.optional-dependencies]
+dev = ["requirements-dev.txt"]
+
+[tool.hatch.build.targets.sdist]
+exclude = ["/.vscode"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tuno"]
+
+[tool.hatch.envs.dev]
+features = ["dev"]
+
+[tool.hatch.envs.dev.scripts]
+style-check = ["black --check src", "isort --check src"]
+
+[tool.hatch.envs.dev.env-vars]
+UNO_CONNECTION = "test@localhost:5000"
+UNO_LOG_LEVEL = "DEBUG"
+
+[project.urls]
+Homepage = "https://github.com/huang2002/tuno"
+Changelog = "https://github.com/huang2002/tuno/blob/main/CHANGELOG.md"
+License = "https://github.com/huang2002/tuno/blob/main/LICENSE"
+
+[tool.mypy]
+files = "src/tuno"
+strict = true
+follow_untyped_imports = true
+
+[tool.isort]
+profile = "black"
+line_length = 80
+
+[tool.black]
+line_length = 80
