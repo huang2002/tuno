@@ -16,6 +16,7 @@ from tuno.server.exceptions import (
     NewPlayerToStartedGameException,
     NotEnoughPlayersException,
     PlayerNotFoundException,
+    RuleUpdateOnStartedGameException,
 )
 from tuno.server.utils.create_deck import create_deck
 from tuno.server.utils.Logger import Logger
@@ -117,6 +118,14 @@ class Game:
     ) -> None:
 
         with self.lock:
+
+            if self.started:
+                debug_message = format_optional_operator(
+                    "Rejected rule update",
+                    operator_name=operator_name,
+                )
+                self.__logger.debug(debug_message)
+                raise RuleUpdateOnStartedGameException()
 
             rules = self.__rules.copy()
             for key, value in modified_rules.items():

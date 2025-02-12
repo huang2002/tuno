@@ -45,6 +45,14 @@ class GameAlreadyStartedException(ApiException):
         )
 
 
+class RuleUpdateOnStartedGameException(ApiException):
+    def __init__(self) -> None:
+        super().__init__(
+            400,
+            "Cannot update rules on a started game.",
+        )
+
+
 class NotEnoughPlayersException(ApiException):
     def __init__(self) -> None:
         super().__init__(
