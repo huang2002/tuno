@@ -25,6 +25,7 @@ def setup(blueprint: Blueprint) -> None:
         game.kick_out_player(
             target_name=target_player_name,
             operator_name=operator_name,
+            operator_is_player=True,
         )
 
         return ("Player kicked out.", 200)

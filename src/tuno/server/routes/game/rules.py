@@ -29,6 +29,7 @@ def setup(blueprint: Blueprint) -> None:
         game.update_rules(
             cast(dict[str, object], modified_rules),
             operator_name=player_name,
+            operator_is_player=True,
         )
 
         return ("Rule updated.", 200)

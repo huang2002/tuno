@@ -79,7 +79,8 @@ def start_server(
         {
             "player_capacity": capacity,
         },
-        operator_name=None,
+        operator_name="server setup",
+        operator_is_player=False,
     )
 
     app = create_app()

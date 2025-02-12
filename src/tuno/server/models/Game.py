@@ -19,8 +19,8 @@ from tuno.server.exceptions import (
     RuleUpdateOnStartedGameException,
 )
 from tuno.server.utils.create_deck import create_deck
+from tuno.server.utils.format_optional_operator import format_optional_operator
 from tuno.server.utils.Logger import Logger
-from tuno.server.utils.misc import format_optional_operator
 from tuno.shared.constraints import (
     DEFAULT_INITIAL_HAND_SIZE,
     DEFAULT_PLAYER_CAPACITY,
@@ -115,6 +115,7 @@ class Game:
         modified_rules: Mapping[str, object],
         *,
         operator_name: str | None,
+        operator_is_player: bool,
     ) -> None:
 
         with self.lock:
@@ -122,7 +123,8 @@ class Game:
             if self.started:
                 debug_message = format_optional_operator(
                     "Rejected rule update",
-                    operator_name=operator_name,
+                    operator_name,
+                    is_player=operator_is_player,
                 )
                 self.__logger.debug(debug_message)
                 raise RuleUpdateOnStartedGameException()
@@ -136,6 +138,7 @@ class Game:
             message = format_optional_operator(
                 "Game rules updated",
                 operator_name,
+                is_player=operator_is_player,
             )
             self.__logger.info(message)
             self.broadcast(
@@ -194,6 +197,7 @@ class Game:
         *,
         target_name: str,
         operator_name: str | None,
+        operator_is_player: bool,
     ) -> None:
 
         with self.lock:
@@ -204,6 +208,7 @@ class Game:
                     format_optional_operator(
                         "Sorry, you are kicked out",
                         operator_name,
+                        is_player=operator_is_player,
                     )
                 )
             )
@@ -213,6 +218,7 @@ class Game:
             format_optional_operator(
                 f"player#{target_name} is kicked out",
                 operator_name,
+                is_player=operator_is_player,
             )
         )
 
@@ -264,7 +270,11 @@ class Game:
                                 )
                             )
                         )
-                        self.stop(state_check_required=False)
+                        self.stop(
+                            operator_name=None,
+                            operator_is_player=False,
+                            state_check_required=False,
+                        )
                         return None
 
                 drawn_card = self.__draw_pile.pop()
@@ -340,7 +350,8 @@ class Game:
 
     def stop(
         self,
-        player_name: str = "",
+        operator_name: str | None,
+        operator_is_player: bool,
         state_check_required: bool = True,
     ) -> None:
         with self.lock:
@@ -353,7 +364,8 @@ class Game:
 
             message = format_optional_operator(
                 "Game stopped",
-                player_name,
+                operator_name,
+                is_player=operator_is_player,
             )
             self.__logger.info(message)
             self.broadcast(

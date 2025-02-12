@@ -20,6 +20,6 @@ def setup(blueprint: Blueprint) -> None:
 
         from tuno.server.models.Game import game
 
-        game.stop(player_name)
+        game.stop(player_name, operator_is_player=True)
 
         return ("Stopped!", 200)
