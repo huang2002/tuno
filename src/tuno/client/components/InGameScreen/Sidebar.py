@@ -49,12 +49,12 @@ class Sidebar(VerticalScroll):
             "-",
             id="sidebar-info-pile-size-draw",
         )
-        label_draw_pile_size.tooltip = "Size of the draw pile."
+        label_draw_pile_size.tooltip = "Draw pile."
         label_discard_pile_size = Label(
             "-",
             id="sidebar-info-pile-size-discard",
         )
-        label_discard_pile_size.tooltip = "Size of the discard pile."
+        label_discard_pile_size.tooltip = "Discard pile."
         container_pile_size = Horizontal(
             label_draw_pile_size,
             Label("|", id="sidebar-info-pile-size-split"),
