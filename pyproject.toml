@@ -48,6 +48,7 @@ features = ["dev"]
 
 [tool.hatch.envs.dev.scripts]
 style-check = ["black --check src", "isort --check src"]
+dev-client = "textual run --dev tuno.client.UnoApp:UnoApp"
 
 [tool.hatch.envs.dev.env-vars]
 UNO_CONNECTION = "test@localhost:5000"
