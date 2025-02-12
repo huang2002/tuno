@@ -46,6 +46,9 @@ class InGameScreen(Screen[object]):
         assert client is not None
         self.sub_title = client.get_connection_display()
 
+        if client.game_state:
+            self.game_state = client.game_state
+
     def action_show_rules(self) -> None:
         self.app.push_screen(RulesScreen())
 
