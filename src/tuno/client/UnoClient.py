@@ -174,8 +174,15 @@ class UnoClient:
 
     def update_rules(self, modified_rules: Mapping[str, object]) -> None:
         api_url = self.get_api_url("/game/rules")
+        assert self.player_name
         with ApiContext("Rule Update Failed", app=self.app):
-            response = put(api_url, json=modified_rules)
+            response = put(
+                api_url,
+                json=modified_rules,
+                params={
+                    "player_name": self.player_name,
+                },
+            )
             response.raise_for_status()
 
     def start_game(self) -> None:
@@ -188,7 +195,7 @@ class UnoClient:
         with ApiContext("Start Failed", app=self.app):
             response = put(
                 api_url,
-                {
+                params={
                     "player_name": player_name,
                 },
             )
@@ -204,7 +211,7 @@ class UnoClient:
         with ApiContext("Stop Failed", app=self.app):
             response = put(
                 api_url,
-                {
+                params={
                     "player_name": player_name,
                 },
             )
