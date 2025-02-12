@@ -78,7 +78,10 @@ class RulesFormItem(Widget):
 
         rule_key = self.rule_key
         rule_hint = self.rule_hint
-        yield Label(f"{rule_key} ({rule_hint})")
+        rule_text = f"{rule_key} ({rule_hint})"
+        yield Label(rule_text)
+
+        self.tooltip = rule_text
 
         rule_type = self.rule_type
         current_rules = client.game_state["rules"]
