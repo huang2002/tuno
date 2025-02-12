@@ -82,7 +82,7 @@ class Game:
     def broadcast(self, event: ServerSentEvent) -> None:
         with self.lock:
             for player in self.__players:
-                player.message_queue.put_nowait(event)
+                player.message_queue.put(event)
 
     def get_game_state_event(self) -> GameStateEvent:
         with self.lock:
@@ -143,7 +143,7 @@ class Game:
                 if len(self.__players) > new_capacity:
                     while len(self.__players) > new_capacity:
                         excess_player = self.__players.pop()
-                        excess_player.message_queue.put_nowait(
+                        excess_player.message_queue.put(
                             EndOfConnectionEvent(
                                 "Sorry, you are kicked out due to "
                                 "a recent rule change."
@@ -190,7 +190,7 @@ class Game:
         with self.lock:
             target_player = self.get_player(target_name)
             target_player.connected = False
-            target_player.message_queue.put_nowait(
+            target_player.message_queue.put(
                 EndOfConnectionEvent(
                     format_optional_operator(
                         "Sorry, you are kicked out",
@@ -263,9 +263,7 @@ class Game:
                 if player:
                     with player.lock:
                         player.cards.extend(drawn_cards)
-                        player.message_queue.put_nowait(
-                            CardsEvent(player.cards)
-                        )
+                        player.message_queue.put(CardsEvent(player.cards))
 
             self.broadcast(self.get_game_state_event())
 
