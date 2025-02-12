@@ -242,6 +242,7 @@ class Game:
                     if allow_shuffle:
                         self.__draw_pile = self.__discard_pile
                         self.__discard_pile = []
+                        self.__logger.debug("Shuffled piles for card drawing.")
                         shuffle(self.__draw_pile)
 
                     if not len(self.__draw_pile):
@@ -260,10 +261,13 @@ class Game:
                 drawn_card = self.__draw_pile.pop()
                 drawn_cards.append(drawn_card)
 
-                if player:
-                    with player.lock:
-                        player.cards.extend(drawn_cards)
-                        player.message_queue.put(CardsEvent(player.cards))
+            if player:
+                with player.lock:
+                    player.cards.extend(drawn_cards)
+                    player.message_queue.put(CardsEvent(player.cards))
+                self.__logger.debug(
+                    f"Cards drawn by player#{player.name}: {drawn_cards!r}"
+                )
 
             self.broadcast(self.get_game_state_event())
 
