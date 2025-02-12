@@ -1,14 +1,11 @@
 from typing import Final
 
 from textual.app import ComposeResult
-from textual.containers import VerticalScroll
+from textual.containers import VerticalScroll, Horizontal
 from textual.reactive import reactive
-from textual.widget import Widget
-from textual.widgets import Button, Label
+from textual.widgets import Label
 
 from tuno.shared.sse_events import GameStateEvent
-
-# TODO: display pile sizes
 
 
 class Sidebar(VerticalScroll):
@@ -47,6 +44,30 @@ class Sidebar(VerticalScroll):
         )
         label_current_player.border_title = "Current"
         yield label_current_player
+
+        label_draw_pile_size = Label(
+            "-",
+            id="sidebar-info-pile-size-draw",
+        )
+        label_draw_pile_size.tooltip = "Size of the draw pile."
+        label_discard_pile_size = Label(
+            "-",
+            id="sidebar-info-pile-size-discard",
+        )
+        label_discard_pile_size.tooltip = "Size of the discard pile."
+        container_pile_size = Horizontal(
+            label_draw_pile_size,
+            Label("|", id="sidebar-info-pile-size-split"),
+            label_discard_pile_size,
+            id="sidebar-info-pile-size",
+            classes="sidebar-info-section",
+        )
+        container_pile_size.border_title = "Pile Size"
+        yield container_pile_size
+
+        # TODO: lead color
+
+        # TODO: lead card
 
     def watch_game_state(
         self,
@@ -129,3 +150,19 @@ class Sidebar(VerticalScroll):
                 self.__CLASS_CURRENT_PLAYER_WAITING,
             )
         label_current_player.update(current_player_name)
+
+        # -- Pile Size --
+        label_draw_pile_size = self.query_exactly_one(
+            f"#sidebar-info-pile-size-draw",
+            Label,
+        )
+        label_discard_pile_size = self.query_exactly_one(
+            f"#sidebar-info-pile-size-discard",
+            Label,
+        )
+        if game_state and game_state["started"]:
+            label_draw_pile_size.update(str(game_state["draw_pile_size"]))
+            label_discard_pile_size.update(str(game_state["discard_pile_size"]))
+        else:
+            label_draw_pile_size.update("-")
+            label_discard_pile_size.update("-")

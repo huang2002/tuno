@@ -31,6 +31,7 @@ Sidebar {
 
     .sidebar-info-section {
         width: 100%;
+        height: 3;
         content-align-horizontal: center;
         color: $foreground-muted;
         border-title-color: $foreground;
@@ -55,6 +56,23 @@ Sidebar {
         }
         &.waiting {
             color: $text-accent;
+        }
+    }
+
+    #sidebar-info-pile-size {
+        align-horizontal: center;
+
+        #sidebar-info-pile-size-draw {
+            color: $text-success;
+        }
+
+        #sidebar-info-pile-size-split {
+            color: $text-muted 20%;
+            margin: 0 1;
+        }
+
+        #sidebar-info-pile-size-discard {
+            color: $text-error;
         }
     }
 }
