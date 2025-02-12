@@ -290,6 +290,8 @@ class Game:
             # -- dispatch initial cards --
             initial_hand_size = self.__rules["initial_hand_size"]
             for player in self.__players:
+                player.cards.clear()
+            for player in self.__players:
                 if not self.draw_card(initial_hand_size, player=player):
                     return
 
