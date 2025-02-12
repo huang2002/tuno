@@ -15,6 +15,9 @@ from .Actions import Actions
 from .Players import Players
 from .Sidebar import Sidebar
 
+# TODO: Introduce PendingScreen to extract
+# pending-phase interfaces from InGameScreen.
+
 
 class InGameScreen(Screen[object]):
 
