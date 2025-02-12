@@ -63,7 +63,7 @@ class Game:
         self.__rules = GameRules(
             player_capacity=DEFAULT_PLAYER_CAPACITY,
             initial_hand_size=DEFAULT_INITIAL_HAND_SIZE,
-            test_bool=True,
+            shuffle_players=False,
         )
         self.__draw_pile = []
         self.__discard_pile = []
@@ -295,6 +295,11 @@ class Game:
             self.__draw_pile = create_deck()
             self.__discard_pile = []
             shuffle(self.__draw_pile)
+
+            # -- shuffle players if needed --
+            if self.__rules["shuffle_players"]:
+                self.__logger.debug("Shuffled players.")
+                shuffle(self.__players)
 
             # -- dispatch initial cards --
             initial_hand_size = self.__rules["initial_hand_size"]

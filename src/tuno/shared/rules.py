@@ -69,6 +69,11 @@ class GameRules(TypedDict):
             MAX_PLAYER_CAPACITY,
         ),
     ]
+    shuffle_players: Annotated[
+        bool,
+        "shuffle players before starting",
+        None,
+    ]
     initial_hand_size: Annotated[
         int,
         f"{MIN_INITIAL_HAND_SIZE}~{MAX_INITIAL_HAND_SIZE}",
@@ -77,11 +82,6 @@ class GameRules(TypedDict):
             MIN_INITIAL_HAND_SIZE,
             MAX_INITIAL_HAND_SIZE,
         ),
-    ]
-    test_bool: Annotated[
-        bool,
-        "test rule",
-        None,
     ]
 
 
