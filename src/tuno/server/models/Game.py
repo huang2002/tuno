@@ -201,6 +201,7 @@ class Game:
     ) -> None:
 
         with self.lock:
+
             target_player = self.get_player(target_name)
             target_player.connected = False
             target_player.message_queue.put(
@@ -213,6 +214,10 @@ class Game:
                 )
             )
             self.__players.remove(target_player)
+
+            if self.started:
+                self.__discard_pile.extend(target_player.cards)
+                target_player.cards.clear()
 
         self.__logger.info(
             format_optional_operator(
