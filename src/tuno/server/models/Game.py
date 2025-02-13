@@ -1,4 +1,4 @@
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from random import shuffle
 from threading import RLock, Thread
 from time import monotonic
@@ -21,6 +21,7 @@ from tuno.server.exceptions import (
 from tuno.server.utils.create_deck import create_deck
 from tuno.server.utils.format_optional_operator import format_optional_operator
 from tuno.server.utils.Logger import Logger
+from tuno.shared.check_play import check_play
 from tuno.shared.constraints import (
     DEFAULT_INITIAL_HAND_SIZE,
     DEFAULT_PLAYER_CAPACITY,
@@ -349,6 +350,59 @@ class Game:
             )
 
             self.broadcast(self.get_game_state_event())
+
+    def play(
+        self,
+        player_name: str,
+        card_ids: Iterable[str],
+        play_color: BasicCardColor | None,
+    ) -> None:
+        with self.lock:
+
+            player = self.get_player(player_name)
+            player_cards_backup = player.cards.copy()
+            cards_out = player.give_out_cards(card_ids)
+
+            try:
+                lead_color = self.__lead_color
+                lead_card = self.__lead_card
+                if not (lead_color and lead_card):
+                    raise InvalidLeadCardInfoException(lead_card, lead_color)
+                check_play(
+                    cards_out,
+                    lead_color=lead_color,
+                    lead_card=lead_card,
+                    rules=self.__rules,
+                )
+            except:
+                player.cards = player_cards_backup
+                raise
+            else:
+
+                self.__logger.info(f"Player#{player.name} played: {cards_out!r}")
+
+                self.__discard_pile.extend(cards_out)
+
+                if len(player.cards) == 0:
+                    self.broadcast(
+                        NotificationEvent(
+                            NotificationEvent.DataType(
+                                title="Game Ended",
+                                message=f"Player#{player.name} won!",
+                            )
+                        )
+                    )
+                    return self.stop(operator_name=None, operator_is_player=False)
+
+                self.set_lead_card_info(cards_out[-1], lead_color=play_color)
+
+                player_count = len(self.__players)
+                self.__current_player_index = (
+                    self.__current_player_index + 1
+                ) % player_count
+
+                player.message_queue.put(player.get_cards_event())
+                self.broadcast(self.get_game_state_event())
 
     def stop(
         self,

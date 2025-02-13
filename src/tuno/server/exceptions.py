@@ -1,3 +1,5 @@
+from collections.abc import Iterable
+
 from tuno.shared.constraints import MIN_PLAYER_CAPACITY
 from tuno.shared.deck import BasicCardColor, Card
 
@@ -71,8 +73,20 @@ class GameNotStartedException(ApiException):
 
 
 class InvalidLeadCardInfoException(ApiException):
-    def __init__(self, lead_card: Card, lead_color: BasicCardColor | None) -> None:
+    def __init__(
+        self,
+        lead_card: Card | None,
+        lead_color: BasicCardColor | None,
+    ) -> None:
         super().__init__(
             400,
             f"Invalid lead card info: {lead_card!r}, {lead_color!r}",
+        )
+
+
+class CardIdsNotFoundException(ApiException):
+    def __init__(self, card_ids: Iterable[str]) -> None:
+        super().__init__(
+            400,
+            f"Card id(s) not found: {', '.join(card_ids)}",
         )

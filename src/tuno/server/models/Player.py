@@ -1,10 +1,11 @@
-from collections.abc import Generator
+from collections.abc import Generator, Iterable
 from contextlib import contextmanager
 from queue import Queue
 from threading import RLock
 from time import monotonic
 
 from tuno.server.config import PLAYER_MESSAGE_QUEUE_SIZE
+from tuno.server.exceptions import CardIdsNotFoundException
 from tuno.server.utils.Logger import Logger
 from tuno.shared.deck import Deck
 from tuno.shared.sse_events import CardsEvent, ServerSentEvent
@@ -54,3 +55,25 @@ class Player:
 
     def get_cards_event(self) -> CardsEvent:
         return CardsEvent(self.cards)
+
+    def give_out_cards(self, card_ids: Iterable[str]) -> Deck:
+
+        cards_ids_remaining = set(card_ids)
+        cards_left: Deck = []
+        cards_out: Deck = []
+
+        with self.lock:
+
+            for card in self.cards:
+                if card["id"] in cards_ids_remaining:
+                    cards_ids_remaining.remove(card["id"])
+                    cards_out.append(card)
+                else:
+                    cards_left.append(card)
+
+            if len(cards_ids_remaining) > 0:
+                raise CardIdsNotFoundException(cards_ids_remaining)
+
+            self.cards = cards_left
+
+        return cards_out
