@@ -40,8 +40,7 @@ def load_event_handler_map() -> EventHandlerMap:
 
         module = import_module(f".{module_name}", __name__)
         if not (
-            hasattr(module, "handler")
-            and isinstance(module.handler, EventHandler)
+            hasattr(module, "handler") and isinstance(module.handler, EventHandler)
         ):
             raise RuntimeError(f"Invalid event handler module: {entry}")
 

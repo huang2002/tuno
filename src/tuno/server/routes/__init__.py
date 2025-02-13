@@ -54,9 +54,7 @@ def load_routes() -> Blueprint:
 
     @blueprint.errorhandler(ApiException)
     def handle_api_exception(exception: ApiException) -> tuple[str, int]:
-        __logger.warn(
-            f"ApiException({exception.http_code}): {exception.message}"
-        )
+        __logger.warn(f"ApiException({exception.http_code}): {exception.message}")
         return exception.message, exception.http_code
 
     return blueprint

@@ -232,9 +232,7 @@ class RulesScreen(ModalScreen[object]):
         self,
         message: RulesForm.FormValidationChanged,
     ) -> None:
-        self.query_exactly_one("#rules-submit", Button).disabled = (
-            not message.all_valid
-        )
+        self.query_exactly_one("#rules-submit", Button).disabled = not message.all_valid
 
     @work(thread=True)
     def action_submit(self) -> None:

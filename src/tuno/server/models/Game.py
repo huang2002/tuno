@@ -93,9 +93,7 @@ class Game:
                     started=started,
                     rules=self.__rules,
                     draw_pile_size=(len(self.__draw_pile) if started else -1),
-                    discard_pile_size=(
-                        len(self.__discard_pile) if started else -1
-                    ),
+                    discard_pile_size=(len(self.__discard_pile) if started else -1),
                     players=[
                         GameStateEvent.PlayerDataType(
                             name=player.name,
@@ -409,9 +407,7 @@ class Game:
                         player.connected = False
                         if player.subscription_token:
                             if player.last_pending_timestamp:
-                                pending_time = (
-                                    now - player.last_pending_timestamp
-                                )
+                                pending_time = now - player.last_pending_timestamp
                                 if pending_time < player_timeout_seconds:
                                     player.connected = True
                             else:

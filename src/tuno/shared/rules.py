@@ -49,8 +49,7 @@ class IntRangeRuleValidator(RuleValidator):
     def validate(self, value: object) -> None:
         if not isinstance(value, int):
             raise RuleValidationException(
-                f"{self.rule_name} must be an integer, "
-                f"got: {type(value).__name__}"
+                f"{self.rule_name} must be an integer, " f"got: {type(value).__name__}"
             )
         if not self.min <= value <= self.max:
             raise RuleValidationException(
@@ -98,17 +97,14 @@ def get_rule_annotation(key: str) -> RuleAnnotation:
 
     type_annotation = GameRules.__annotations__[key]
     if get_origin(type_annotation) is not Annotated:
-        raise RuleValidationException(
-            f"Invalid rule annotation: {type_annotation}"
-        )
+        raise RuleValidationException(f"Invalid rule annotation: {type_annotation}")
 
     type_metadata: tuple[object, object, object] = type_annotation.__metadata__
     if (
         (len(type_metadata) != 2)
         or (not isinstance(type_metadata[0], str))
         or not (
-            (type_metadata[1] is None)
-            or isinstance(type_metadata[1], RuleValidator)
+            (type_metadata[1] is None) or isinstance(type_metadata[1], RuleValidator)
         )
     ):
         raise RuleValidationException(

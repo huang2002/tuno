@@ -52,8 +52,7 @@ def setup(blueprint: Blueprint) -> None:
                 yield init_event.to_sse()
             logger.debug(
                 f"Sent current game state to player#{player_name} "
-                f"(subscription_token: {subscription_token}): "
-                + repr(init_event)
+                f"(subscription_token: {subscription_token}): " + repr(init_event)
             )
 
             # slow iteration detection
@@ -116,8 +115,7 @@ def setup(blueprint: Blueprint) -> None:
                     yield event.to_sse()
                 logger.debug(
                     f"Event sent to player#{player_name} "
-                    f"(subscription_token: {subscription_token}): "
-                    + repr(event)
+                    f"(subscription_token: {subscription_token}): " + repr(event)
                 )
 
             logger.info(

@@ -131,19 +131,11 @@ class Sidebar(VerticalScroll):
                     current_player_index,
                 )
             if current_player_name == app.client.player_name:
-                label_current_player.add_class(
-                    self.__CLASS_CURRENT_PLAYER_ACTIVE
-                )
-                label_current_player.remove_class(
-                    self.__CLASS_CURRENT_PLAYER_WAITING
-                )
+                label_current_player.add_class(self.__CLASS_CURRENT_PLAYER_ACTIVE)
+                label_current_player.remove_class(self.__CLASS_CURRENT_PLAYER_WAITING)
             else:
-                label_current_player.remove_class(
-                    self.__CLASS_CURRENT_PLAYER_ACTIVE
-                )
-                label_current_player.add_class(
-                    self.__CLASS_CURRENT_PLAYER_WAITING
-                )
+                label_current_player.remove_class(self.__CLASS_CURRENT_PLAYER_ACTIVE)
+                label_current_player.add_class(self.__CLASS_CURRENT_PLAYER_WAITING)
         else:
             label_current_player.remove_class(
                 self.__CLASS_CURRENT_PLAYER_ACTIVE,
