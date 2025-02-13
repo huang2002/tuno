@@ -30,7 +30,6 @@ from tuno.shared.deck import BasicCardColor, Card, Deck
 from tuno.shared.loop import loop
 from tuno.shared.rules import GameRules, check_rule_update
 from tuno.shared.sse_events import (
-    CardsEvent,
     EndOfConnectionEvent,
     GameStateEvent,
     NotificationEvent,
@@ -286,7 +285,7 @@ class Game:
             if player:
                 with player.lock:
                     player.cards.extend(drawn_cards)
-                    player.message_queue.put(CardsEvent(player.cards))
+                    player.message_queue.put(player.get_cards_event())
                 self.__logger.debug(
                     f"Cards drawn by player#{player.name}: {drawn_cards!r}"
                 )

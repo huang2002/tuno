@@ -7,7 +7,7 @@ from time import monotonic
 from tuno.server.config import PLAYER_MESSAGE_QUEUE_SIZE
 from tuno.server.utils.Logger import Logger
 from tuno.shared.deck import Deck
-from tuno.shared.sse_events import ServerSentEvent
+from tuno.shared.sse_events import CardsEvent, ServerSentEvent
 
 
 class Player:
@@ -51,3 +51,6 @@ class Player:
             yield
             self.__last_pending_timestamp = None
             self.__last_sent_timestamp = monotonic()
+
+    def get_cards_event(self) -> CardsEvent:
+        return CardsEvent(self.cards)
