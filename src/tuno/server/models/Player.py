@@ -15,31 +15,39 @@ class Player:
     name: str
     cards: Deck
     message_queue: Queue[ServerSentEvent]
-    logger: Logger
     lock: RLock
-    subscription_token: str
-    last_pending_timestamp: float | None
-    last_sent_timestamp: float | None
     connected: bool  # set by game watcher
+    subscription_token: str
+    __logger: Logger
+    __last_pending_timestamp: float | None
+    __last_sent_timestamp: float | None
 
     def __init__(self, name: str) -> None:
 
         self.name = name
         self.cards = []
         self.message_queue = Queue(PLAYER_MESSAGE_QUEUE_SIZE)
-        self.logger = Logger(f"{__name__}#{name}")
         self.lock = RLock()
-        self.subscription_token = ""
-        self.last_pending_timestamp = None
-        self.last_sent_timestamp = None
         self.connected = False
+        self.subscription_token = ""
+        self.__logger = Logger(f"{__name__}#{name}")
+        self.__last_pending_timestamp = None
+        self.__last_sent_timestamp = None
 
-        self.logger.debug(f"player#{name} created")
+        self.__logger.debug(f"player#{name} created")
+
+    @property
+    def last_pending_timestamp(self) -> float | None:
+        return self.__last_pending_timestamp
+
+    @property
+    def last_sent_timestamp(self) -> float | None:
+        return self.__last_sent_timestamp
 
     @contextmanager
     def message_context(self) -> Generator[None]:
         with self.lock:
-            self.last_pending_timestamp = monotonic()
+            self.__last_pending_timestamp = monotonic()
             yield
-            self.last_pending_timestamp = None
-            self.last_sent_timestamp = monotonic()
+            self.__last_pending_timestamp = None
+            self.__last_sent_timestamp = monotonic()
