@@ -59,6 +59,7 @@ class IntRangeRuleValidator(RuleValidator):
 
 
 class GameRules(TypedDict):
+
     player_capacity: Annotated[
         int,
         f"{MIN_PLAYER_CAPACITY}~{MAX_PLAYER_CAPACITY}",
@@ -68,11 +69,13 @@ class GameRules(TypedDict):
             MAX_PLAYER_CAPACITY,
         ),
     ]
+
     shuffle_players: Annotated[
         bool,
         "shuffle players before starting",
         None,
     ]
+
     initial_hand_size: Annotated[
         int,
         f"{MIN_INITIAL_HAND_SIZE}~{MAX_INITIAL_HAND_SIZE}",
@@ -81,6 +84,12 @@ class GameRules(TypedDict):
             MIN_INITIAL_HAND_SIZE,
             MAX_INITIAL_HAND_SIZE,
         ),
+    ]
+
+    any_last_play: Annotated[
+        bool,
+        "allow non-number card as last play",
+        None,
     ]
 
 

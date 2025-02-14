@@ -69,6 +69,7 @@ class Game:
             player_capacity=DEFAULT_PLAYER_CAPACITY,
             initial_hand_size=DEFAULT_INITIAL_HAND_SIZE,
             shuffle_players=False,
+            any_last_play=False,
         )
         self.__draw_pile = []
         self.__discard_pile = []
@@ -381,9 +382,11 @@ class Game:
             player_cards_backup = player.cards.copy()
             cards_out = player.give_out_cards(card_ids)
 
+            lead_color = self.__lead_color
+            lead_card = self.__lead_card
+            rules = self.__rules
+
             try:
-                lead_color = self.__lead_color
-                lead_card = self.__lead_card
                 if not (lead_color and lead_card):
                     raise InvalidLeadCardInfoException(lead_card, lead_color)
                 check_play(
@@ -391,7 +394,7 @@ class Game:
                     lead_color=lead_color,
                     lead_card=lead_card,
                     skip_counter=self.__skip_counter,
-                    rules=self.__rules,
+                    rules=rules,
                 )
             except:
                 player.cards = player_cards_backup
@@ -431,7 +434,11 @@ class Game:
                 self.set_lead_card_info(cards_out[-1], lead_color=play_color)
 
                 if len(player.cards) == 0:
-                    if n_cards_out == 1 and cards_out[0]["type"] != "number":
+                    if (
+                        (not rules["any_last_play"])
+                        and (n_cards_out == 1)
+                        and (cards_out[0]["type"] != "number")
+                    ):
                         self.draw_cards(1, player=player, allow_shuffle=True)
                     else:
                         self.broadcast(
