@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from inspect import get_annotations
 from typing import (
     Annotated,
     NamedTuple,
@@ -101,10 +102,12 @@ class RuleAnnotation(NamedTuple):
 
 def get_rule_annotation(key: str) -> RuleAnnotation:
 
-    if key not in GameRules.__annotations__:
+    annotations = get_annotations(GameRules)
+
+    if key not in annotations:
         raise RuleValidationException(f"Unknown rule: {key}")
 
-    type_annotation = GameRules.__annotations__[key]
+    type_annotation = annotations[key]
     if get_origin(type_annotation) is not Annotated:
         raise RuleValidationException(f"Invalid rule annotation: {type_annotation}")
 
