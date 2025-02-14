@@ -1,8 +1,7 @@
-from collections.abc import Iterable
 from typing import Literal, TypedDict, get_args
 
 type BasicCardColor = Literal["red", "green", "blue", "yellow"]
-basic_card_colors: Iterable[BasicCardColor] = get_args(BasicCardColor.__value__)
+basic_card_colors: tuple[BasicCardColor, ...] = get_args(BasicCardColor.__value__)
 
 
 class NumberCard(TypedDict):
@@ -13,7 +12,7 @@ class NumberCard(TypedDict):
 
 
 type FunctionCardEffect = Literal["skip", "+2", "reverse"]
-function_card_effects: Iterable[FunctionCardEffect] = get_args(
+function_card_effects: tuple[FunctionCardEffect, ...] = get_args(
     FunctionCardEffect.__value__
 )
 
@@ -26,7 +25,7 @@ class FunctionCard(TypedDict):
 
 
 type WildCardEffect = Literal["+4", "color"]
-wild_card_effects: Iterable[WildCardEffect] = get_args(WildCardEffect.__value__)
+wild_card_effects: tuple[WildCardEffect, ...] = get_args(WildCardEffect.__value__)
 type WildCardColor = Literal["black"]
 wild_card_color: WildCardColor = "black"
 
