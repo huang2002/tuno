@@ -3,7 +3,7 @@ from collections.abc import Callable, Mapping
 from threading import RLock, Thread
 from typing import TYPE_CHECKING
 
-from requests import RequestException, get, put
+from requests import RequestException, get, post, put
 from requests_sse import EventSource
 from textual import log
 
@@ -198,6 +198,23 @@ class UnoClient:
                 params={
                     "player_name": player_name,
                 },
+            )
+            response.raise_for_status()
+
+    def play(self, card_ids: list[str], color: str | None) -> None:
+
+        player_name = self.player_name
+        assert player_name
+
+        api_url = self.get_api_url(f"/player/{player_name}/play")
+
+        with ApiContext("Play Failed", app=self.app):
+            response = post(
+                api_url,
+                params={
+                    "color": color,
+                },
+                json=card_ids,
             )
             response.raise_for_status()
 

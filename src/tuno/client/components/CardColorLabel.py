@@ -19,10 +19,10 @@ class CardColorLabel(Label):
 
     def watch_data(self, data: BasicCardColor | None) -> None:
         if data is None:
-            self.styles.background = "gray"
+            self.styles.background = "gray 50%"
             self.update("???")
             self.tooltip = None
         else:
-            self.styles.background = data
+            self.styles.background = f"{data} 90%"
             self.update(data)
             self.tooltip = data

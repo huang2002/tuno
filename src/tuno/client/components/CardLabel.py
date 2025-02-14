@@ -25,7 +25,7 @@ class CardLabel(Label):
             self.tooltip = None
             return
 
-        self.styles.background = data["color"]
+        self.styles.background = f"{data['color']} 90%"
 
         content = ""
         if data["color"] == "black":

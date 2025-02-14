@@ -26,7 +26,7 @@ class PlayerCard(Widget):
         grid-columns: 2 1fr;
 
         &.active {
-            border: heavy $primary;
+            border: heavy $success;
         }
 
         .player-card-connected {
