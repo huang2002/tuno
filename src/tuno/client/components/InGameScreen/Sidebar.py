@@ -3,8 +3,11 @@ from typing import Final
 from textual.app import ComposeResult
 from textual.containers import Horizontal, VerticalScroll
 from textual.reactive import reactive
+from textual.widget import Widget
 from textual.widgets import Label
 
+from tuno.client.components.CardColorLabel import CardColorLabel
+from tuno.client.components.CardLabel import CardLabel
 from tuno.shared.sse_events import GameStateEvent
 
 
@@ -37,6 +40,14 @@ class Sidebar(VerticalScroll):
         label_capacity.border_title = "Capacity"
         yield label_capacity
 
+        label_direction = Label(
+            "-/-",
+            id="sidebar-info-direction",
+            classes="sidebar-info-section",
+        )
+        label_direction.border_title = "Direction"
+        yield label_direction
+
         label_current_player = Label(
             "-/-",
             id="sidebar-info-current-player",
@@ -57,7 +68,7 @@ class Sidebar(VerticalScroll):
         label_discard_pile_size.tooltip = "Discard pile."
         container_pile_size = Horizontal(
             label_draw_pile_size,
-            Label("|", id="sidebar-info-pile-size-split"),
+            Label("|", classes="sidebar-info-split"),
             label_discard_pile_size,
             id="sidebar-info-pile-size",
             classes="sidebar-info-section",
@@ -65,9 +76,41 @@ class Sidebar(VerticalScroll):
         container_pile_size.border_title = "Pile Size"
         yield container_pile_size
 
-        # TODO: lead color
+        label_draw_counter = Label(
+            "-",
+            id="sidebar-info-draw-counter",
+        )
+        label_draw_counter.tooltip = "Draw counter."
+        label_skip_counter = Label(
+            "-",
+            id="sidebar-info-skip-counter",
+        )
+        label_skip_counter.tooltip = "Skip counter."
+        container_counters = Horizontal(
+            label_draw_counter,
+            Label("|", classes="sidebar-info-split"),
+            label_skip_counter,
+            id="sidebar-info-counters",
+            classes="sidebar-info-section",
+        )
+        container_counters.border_title = "Draw/Skip"
+        yield container_counters
 
-        # TODO: lead card
+        widget_lead_color = Widget(
+            CardColorLabel(id="sidebar-info-lead-color"),
+            id="sidebar-info-lead-color-container",
+            classes="sidebar-info-section",
+        )
+        widget_lead_color.border_title = "Lead Color"
+        yield widget_lead_color
+
+        widget_lead_card = Widget(
+            CardLabel(id="sidebar-info-lead-card"),
+            id="sidebar-info-lead-card-container",
+            classes="sidebar-info-section",
+        )
+        widget_lead_card.border_title = "Lead Card"
+        yield widget_lead_card
 
     def watch_game_state(
         self,
@@ -114,6 +157,17 @@ class Sidebar(VerticalScroll):
         else:
             label_player_capacity.update("-/-")
 
+        # -- Direction --
+        label_direction = self.query_exactly_one(
+            "#sidebar-info-direction",
+            Label,
+        )
+        if game_state and game_state["started"]:
+            direction = f"{game_state['direction']:+d}"
+            label_direction.update(direction)
+        else:
+            label_direction.update("N/A")
+
         # -- Current Player --
         label_current_player = self.query_exactly_one(
             "#sidebar-info-current-player",
@@ -158,3 +212,33 @@ class Sidebar(VerticalScroll):
         else:
             label_draw_pile_size.update("-")
             label_discard_pile_size.update("-")
+
+        # -- Draw/Skip Counters --
+        label_draw_count = self.query_exactly_one(
+            f"#sidebar-info-draw-counter",
+            Label,
+        )
+        label_skip_count = self.query_exactly_one(
+            f"#sidebar-info-skip-counter",
+            Label,
+        )
+        if game_state and game_state["started"]:
+            label_draw_count.update(str(game_state["draw_counter"]))
+            label_skip_count.update(str(game_state["skip_counter"]))
+        else:
+            label_draw_count.update("-")
+            label_skip_count.update("-")
+
+        # -- Lead Color --
+        widget_lead_color = self.query_exactly_one(
+            f"#sidebar-info-lead-color",
+            CardColorLabel,
+        )
+        widget_lead_color.data = game_state and game_state["lead_color"]
+
+        # -- Lead Card --
+        widget_lead_card = self.query_exactly_one(
+            f"#sidebar-info-lead-card",
+            CardLabel,
+        )
+        widget_lead_card.data = game_state and game_state["lead_card"]
