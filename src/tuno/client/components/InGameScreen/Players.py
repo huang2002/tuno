@@ -15,6 +15,47 @@ class PlayerCard(Widget):
     __CLASS_PLAYER_CONNECTED: Final = "connected"
     __CLASS_PLAYER_DISCONNECTED: Final = "disconnected"
 
+    DEFAULT_CSS = """
+    PlayerCard {
+        height: 4;
+        border: round $panel;
+        padding: 0 1;
+        layout: grid;
+        grid-size: 2 2;
+        grid-rows: 1 1;
+        grid-columns: 2 1fr;
+
+        &.active {
+            border: heavy $primary;
+        }
+
+        .player-card-connected {
+            width: 1;
+            color: $foreground-muted;
+
+            &.connected {
+                color: $text-success;
+            }
+            &.disconnected {
+                color: $text-error;
+            }
+        }
+
+        .player-card-name {
+            width: 100%;
+        }
+
+        .player-card-count {
+            column-span: 2;
+            align-horizontal: right;
+
+            .player-card-count-label {
+                color: $foreground-muted;
+            }
+        }
+    }
+    """
+
     active: reactive[bool] = reactive(False)
     data: reactive[GameStateEvent.PlayerDataType | None] = reactive(None)
 
@@ -102,6 +143,19 @@ class PlayerCard(Widget):
 class Players(VerticalScroll):
 
     BORDER_TITLE = "Players"
+    DEFAULT_CSS = """
+    Players {
+        padding: 1 2;
+        layout: grid;
+        grid-size: 3;
+        grid-rows: 4;
+        grid-gutter: 0 1;
+
+        LoadingIndicator {
+            background: transparent;
+        }
+    }
+    """
 
     game_state: reactive[GameStateEvent.DataType | None] = reactive(None)
 

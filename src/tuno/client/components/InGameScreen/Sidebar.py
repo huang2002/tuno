@@ -19,6 +19,69 @@ class Sidebar(VerticalScroll):
     __CLASS_CURRENT_PLAYER_WAITING: Final = "waiting"
 
     BORDER_TITLE = "Game Info"
+    DEFAULT_CSS = """
+    Sidebar {
+        row-span: 2;
+        height: 100%;
+        padding: 1 2;
+
+        .sidebar-info-section {
+            width: 100%;
+            height: 3;
+            align-horizontal: center;
+            content-align-horizontal: center;
+            color: $foreground-muted;
+            border-title-color: $foreground;
+            border-title-align: center;
+            border: solid $surface;
+
+            .sidebar-info-split {
+                color: $text-muted 20%;
+                margin: 0 1;
+            }
+        }
+
+        #sidebar-info-status {
+            &.started {
+                color: $text-success;
+            }
+            &.pending {
+                color: $text-warning;
+            }
+        }
+
+        #sidebar-info-current-player {
+            color: $foreground-muted;
+
+            &.active {
+                color: $text-success;
+            }
+            &.waiting {
+                color: $text-accent;
+            }
+        }
+
+        #sidebar-info-pile-size {
+            #sidebar-info-pile-size-draw {
+                color: $text-success;
+            }
+
+            #sidebar-info-pile-size-discard {
+                color: $text-error;
+            }
+        }
+
+        #sidebar-info-counters {
+            #sidebar-info-draw-counter, #sidebar-info-skip-counter {
+                color: $foreground;
+            }
+        }
+
+        #sidebar-info-lead-color-container, #sidebar-info-lead-card-container {
+            padding: 0 1;
+        }
+    }
+    """
 
     game_state: reactive[GameStateEvent.DataType | None] = reactive(None)
 

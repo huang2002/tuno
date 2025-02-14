@@ -9,6 +9,28 @@ from tuno.shared.sse_events import GameStateEvent
 class Actions(HorizontalScroll):
 
     BORDER_TITLE = "Actions"
+    DEFAULT_CSS = """
+    Actions {
+        padding: 1 2;
+        align: center middle;
+
+        Button {
+            min-width: 11;
+            margin: 0 3;
+        }
+
+        Button#action-show-rules {
+            border-top: tall $secondary-lighten-2;
+            border-bottom: tall $secondary-darken-2;
+            background: $secondary;
+
+            &:hover {
+                background: $secondary-darken-1;
+                border-top: tall $primary;
+            }
+        }
+    }
+    """
 
     game_state: reactive[GameStateEvent.DataType | None] = reactive(None)
     game_started: reactive[bool] = reactive(False, recompose=True)
