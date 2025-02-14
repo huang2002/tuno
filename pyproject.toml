@@ -52,7 +52,7 @@ packages = ["src/tuno"]
 features = ["dev"]
 
 [tool.hatch.envs.dev.scripts]
-style-check = ["black --check src", "isort --check src"]
+style-check = ["black --check --quiet src", "isort --check src"]
 dev-client = "textual run --dev tuno.client.UnoApp:UnoApp"
 
 [tool.hatch.envs.dev.env-vars]
