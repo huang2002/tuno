@@ -3,6 +3,7 @@ from typing import cast
 from flask import Blueprint, request
 from flask.typing import ResponseReturnValue
 
+from tuno.server.exceptions import InvalidRequestBodyException
 from tuno.server.utils.checkers import check_player_name
 from tuno.server.utils.Logger import Logger
 
@@ -22,7 +23,9 @@ def setup(blueprint: Blueprint) -> None:
 
         modified_rules = request.json
         if not isinstance(modified_rules, dict):
-            return (f"Invalid request body: {modified_rules!r}", 400)
+            raise InvalidRequestBodyException(
+                f"expected a dict of modified rules, got {modified_rules!r}"
+            )
 
         from tuno.server.models.Game import game
 

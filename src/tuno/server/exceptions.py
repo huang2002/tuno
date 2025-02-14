@@ -15,6 +15,14 @@ class ApiException(Exception):
         self.message = message
 
 
+class InvalidRequestBodyException(ApiException):
+    def __init__(self, message: str) -> None:
+        super().__init__(
+            400,
+            message,
+        )
+
+
 class InvalidPlayerNameException(ApiException):
     def __init__(self, player_name: str) -> None:
         super().__init__(
