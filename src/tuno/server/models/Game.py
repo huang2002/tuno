@@ -251,6 +251,7 @@ class Game:
             else:
                 if lead_color is not None:
                     raise InvalidLeadCardInfoException(lead_card, lead_color)
+                self.__lead_color = lead_card["color"]
             self.__lead_card = lead_card
 
     def draw_cards(
@@ -486,6 +487,8 @@ class Game:
                     raise GameNotStartedException()
 
             self.__started = False
+            self.__lead_color = None
+            self.__lead_card = None
 
             message = format_optional_operator(
                 "Game stopped",
