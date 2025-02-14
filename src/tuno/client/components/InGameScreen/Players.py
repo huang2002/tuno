@@ -128,6 +128,7 @@ class Players(VerticalScroll):
             current_child_count = len(children)
             for i, player_data in enumerate(players[:current_child_count]):
                 children[i].data = player_data
+                children[i].active = i == game_state["current_player_index"]
 
             player_count = len(players)
             if player_count > current_child_count:
@@ -136,7 +137,10 @@ class Players(VerticalScroll):
                 for player_data in new_players:
                     new_children.append(PlayerCard())
                 await self.mount(*new_children)
-                for child, data in zip(new_children, new_players, strict=True):
+                for i, (child, data) in enumerate(
+                    zip(new_children, new_players, strict=True)
+                ):
                     child.data = data
+                    child.active = i == game_state["current_player_index"]
             elif player_count < current_child_count:
                 self.remove_children(children[player_count:])

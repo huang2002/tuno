@@ -107,7 +107,7 @@ Players {
         grid-columns: 2 1fr;
 
         &.active {
-            border: heavy $success;
+            border: heavy $primary;
         }
 
         .player-card-connected {
