@@ -98,3 +98,12 @@ class CardIdsNotFoundException(ApiException):
             400,
             f"Card id(s) not found: {', '.join(card_ids)}",
         )
+
+
+class NotCurrentPlayerException(ApiException):
+    def __init__(self, current_player_name: str) -> None:
+        super().__init__(
+            400,
+            "Sorry, you are not the current player "
+            f"(which is {current_player_name}).",
+        )

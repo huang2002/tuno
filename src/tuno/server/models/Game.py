@@ -1,7 +1,8 @@
-from collections.abc import Iterable, Mapping
+from collections.abc import Mapping, Sequence
 from random import shuffle
 from threading import RLock, Thread
 from time import monotonic
+from typing import TYPE_CHECKING, Literal, assert_never
 
 from tuno.server.config import (
     GAME_WATCHER_INTERVAL,
@@ -14,6 +15,7 @@ from tuno.server.exceptions import (
     GameNotStartedException,
     InvalidLeadCardInfoException,
     NewPlayerToStartedGameException,
+    NotCurrentPlayerException,
     NotEnoughPlayersException,
     PlayerNotFoundException,
     RuleUpdateOnStartedGameException,
@@ -52,8 +54,11 @@ class Game:
     __draw_pile: Deck
     __discard_pile: Deck
     __current_player_index: int
+    __direction: Literal[-1, 1]
     __lead_card: Card | None
     __lead_color: BasicCardColor | None
+    __draw_counter: int
+    __skip_counter: int
     __logger: Logger
 
     def __init__(self) -> None:
@@ -68,8 +73,11 @@ class Game:
         self.__draw_pile = []
         self.__discard_pile = []
         self.__current_player_index = -1
+        self.__direction = 1
         self.__lead_card = None
         self.__lead_color = None
+        self.__draw_counter = 0
+        self.__skip_counter = 0
         self.lock = RLock()
         self.__logger = Logger(f"{__name__}#{self.tag}")
         self.watcher_thread = Thread(target=self.watcher_loop, daemon=True)
@@ -103,8 +111,11 @@ class Game:
                         for player in self.__players
                     ],
                     current_player_index=self.__current_player_index,
+                    direction=self.__direction,
                     lead_card=self.__lead_card,
                     lead_color=self.__lead_color,
+                    draw_counter=self.__draw_counter,
+                    skip_counter=self.__skip_counter,
                 )
             )
 
@@ -241,11 +252,11 @@ class Game:
                     raise InvalidLeadCardInfoException(lead_card, lead_color)
             self.__lead_card = lead_card
 
-    def draw_card(
+    def draw_cards(
         self,
         count: int,
         *,
-        player: Player | None = None,
+        player: Player | None,
         allow_shuffle: bool = False,
     ) -> Deck | None:
 
@@ -319,13 +330,13 @@ class Game:
             for player in self.__players:
                 player.cards.clear()
             for player in self.__players:
-                if not self.draw_card(initial_hand_size, player=player):
+                if not self.draw_cards(initial_hand_size, player=player):
                     return
 
             # -- set lead card --
             lead_card: Card | None = None
             while (lead_card is None) or (lead_card["type"] != "number"):
-                lead_card_drawn = self.draw_card(1)
+                lead_card_drawn = self.draw_cards(1, player=None)
                 if not lead_card_drawn:
                     return
                 else:
@@ -336,6 +347,9 @@ class Game:
 
             # -- initialize other states --
             self.__current_player_index = 0
+            self.__direction = 1
+            self.__draw_counter = 0
+            self.__skip_counter = 0
             self.__started = True
 
             message = f"Game started by player#{player_name}."
@@ -354,12 +368,16 @@ class Game:
     def play(
         self,
         player_name: str,
-        card_ids: Iterable[str],
+        card_ids: Sequence[str],
         play_color: BasicCardColor | None,
     ) -> None:
         with self.lock:
 
             player = self.get_player(player_name)
+            expected_player = self.__players[self.__current_player_index]
+            if player != expected_player:
+                raise NotCurrentPlayerException(expected_player.name)
+
             player_cards_backup = player.cards.copy()
             cards_out = player.give_out_cards(card_ids)
 
@@ -372,6 +390,7 @@ class Game:
                     cards_out,
                     lead_color=lead_color,
                     lead_card=lead_card,
+                    skip_counter=self.__skip_counter,
                     rules=self.__rules,
                 )
             except:
@@ -381,25 +400,68 @@ class Game:
 
                 self.__logger.info(f"Player#{player.name} played: {cards_out!r}")
 
+                n_cards_out = len(cards_out)
+                assert n_cards_out > 0
+
+                for card in cards_out:
+                    if card["type"] == "number":
+                        continue
+                    elif card["type"] == "function":
+                        if card["effect"] == "+2":
+                            self.__draw_counter += 2
+                            self.__skip_counter += 1
+                        elif card["effect"] == "skip":
+                            self.__skip_counter += 1
+                        elif card["effect"] == "reverse":
+                            self.__direction = -self.__direction
+                        else:
+                            assert_never(card["effect"])
+                    elif card["type"] == "wild":
+                        if card["effect"] == "+4":
+                            self.__draw_counter += 4
+                            self.__skip_counter += 1
+                        elif card["effect"] == "color":
+                            pass
+                        else:
+                            assert_never(card["effect"])
+                    else:
+                        assert_never(card["type"])
+
                 self.__discard_pile.extend(cards_out)
-
-                if len(player.cards) == 0:
-                    self.broadcast(
-                        NotificationEvent(
-                            NotificationEvent.DataType(
-                                title="Game Ended",
-                                message=f"Player#{player.name} won!",
-                            )
-                        )
-                    )
-                    return self.stop(operator_name=None, operator_is_player=False)
-
                 self.set_lead_card_info(cards_out[-1], lead_color=play_color)
 
+                if len(player.cards) == 0:
+                    if n_cards_out == 1 and cards_out[0]["type"] != "number":
+                        self.draw_cards(1, player=player, allow_shuffle=True)
+                    else:
+                        self.broadcast(
+                            NotificationEvent(
+                                NotificationEvent.DataType(
+                                    title="Game Ended",
+                                    message=f"Player#{player.name} won!",
+                                )
+                            )
+                        )
+                        return self.stop(operator_name=None, operator_is_player=False)
+
                 player_count = len(self.__players)
+
+                if self.__draw_counter > 0:
+                    next_player_index = self.__current_player_index = (
+                        self.__current_player_index + self.__direction
+                    ) % player_count
+                    next_player = self.__players[next_player_index]
+                    self.draw_cards(
+                        self.__draw_counter,
+                        player=next_player,
+                        allow_shuffle=True,
+                    )
+                    self.__draw_counter = 0
+
                 self.__current_player_index = (
-                    self.__current_player_index + 1
+                    self.__current_player_index + self.__direction * self.__skip_counter
                 ) % player_count
+                self.__skip_counter = 0
 
                 player.message_queue.put(player.get_cards_event())
                 self.broadcast(self.get_game_state_event())

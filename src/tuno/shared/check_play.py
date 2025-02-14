@@ -14,6 +14,7 @@ def check_play(
     *,
     lead_color: BasicCardColor,
     lead_card: Card,
+    skip_counter: int,
     rules: GameRules,
 ) -> None:
 
@@ -22,6 +23,9 @@ def check_play(
 
     if len(play) > 1:
         raise InvalidPlayException("Only one card can be played at a time.")
+
+    if skip_counter > 0:
+        raise InvalidPlayException("Skipped players cannot play.")
 
     played_card = play[0]
 

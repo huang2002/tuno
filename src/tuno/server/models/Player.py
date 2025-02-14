@@ -1,4 +1,4 @@
-from collections.abc import Generator, Iterable
+from collections.abc import Generator, Sequence
 from contextlib import contextmanager
 from queue import Queue
 from threading import RLock
@@ -56,7 +56,10 @@ class Player:
     def get_cards_event(self) -> CardsEvent:
         return CardsEvent(self.cards)
 
-    def give_out_cards(self, card_ids: Iterable[str]) -> Deck:
+    def give_out_cards(self, card_ids: Sequence[str]) -> Deck:
+
+        if len(card_ids) == 0:
+            return []
 
         cards_ids_remaining = set(card_ids)
         cards_left: Deck = []

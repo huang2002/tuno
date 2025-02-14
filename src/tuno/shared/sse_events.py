@@ -64,8 +64,11 @@ class GameStateEvent(ServerSentEvent):
         discard_pile_size: int
         players: "list[GameStateEvent.PlayerDataType]"
         current_player_index: int
+        direction: int
         lead_card: Card | None
         lead_color: BasicCardColor | None
+        draw_counter: int
+        skip_counter: int
 
     type = "game_state"
     data: DataType
