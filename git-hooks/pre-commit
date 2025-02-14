@@ -1,0 +1,3 @@
+#!/bin/sh
+hatch run dev:mypy
+hatch run dev:style-check
