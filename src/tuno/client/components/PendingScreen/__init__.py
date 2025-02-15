@@ -59,7 +59,7 @@ class PendingScreen(Screen[object]):
         self.sub_title = client.get_connection_display()
 
     def action_show_rules(self) -> None:
-        self.app.push_screen(RulesScreen())
+        self.app.push_screen(RulesScreen(readonly=False))
 
     @work(thread=True)
     def action_start_game(self) -> None:

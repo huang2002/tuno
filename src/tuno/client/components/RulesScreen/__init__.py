@@ -25,15 +25,17 @@ class RulesFormItem(Widget):
     __CLASS_FOCUS: Final = "focus"
     __CLASS_INVALID: Final = "invalid"
 
+    readonly: bool
     rule_key: str
     rule_type: type
     rule_hint: str
     textual_validator: FunctionValidator | None
     focused_descendants: set[Widget]
 
-    def __init__(self, rule_key: str) -> None:
+    def __init__(self, rule_key: str, *, readonly: bool) -> None:
         super().__init__()
 
+        self.readonly = readonly
         self.rule_key = rule_key
         self.focused_descendants = set()
 
@@ -104,6 +106,7 @@ class RulesFormItem(Widget):
             )
         else:
             raise NotImplementedError()
+        input_widget.disabled = self.readonly
         yield Right(input_widget)
 
     @on(DescendantFocus)
@@ -157,12 +160,18 @@ class RulesForm(VerticalScroll):
     invalid_inputs: reactive[set[Input]] = reactive(set, init=False)
     all_valid: reactive[bool] = reactive(True, init=False)
 
+    readonly: bool
+
+    def __init__(self, *, readonly: bool) -> None:
+        super().__init__()
+        self.readonly = readonly
+
     def compute_all_valid(self) -> bool:
         return len(self.invalid_inputs) == 0
 
     def compose(self) -> ComposeResult:
         for key in GameRules.__annotations__.keys():
-            yield RulesFormItem(key)
+            yield RulesFormItem(key, readonly=self.readonly)
 
     def on_mount(self) -> None:
         invalid_input_detected = False
@@ -194,19 +203,31 @@ class RulesScreen(ModalScreen[object]):
         ("escape", "screen.dismiss", "Cancel"),
     ]
 
+    readonly: bool
+
+    def __init__(self, *, readonly: bool) -> None:
+        super().__init__()
+        self.readonly = readonly
+
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
         yield Vertical(
             Label("Game Rules", id="rules-title"),
-            RulesForm(),
+            RulesForm(readonly=self.readonly),
             Horizontal(
                 Button(
                     "Submit",
                     id="rules-submit",
                     variant="primary",
                     action="screen.submit",
+                    disabled=self.readonly,
                 ),
-                Button("Reset", variant="error", action="screen.reset"),
+                Button(
+                    "Reset",
+                    variant="error",
+                    action="screen.reset",
+                    disabled=self.readonly,
+                ),
                 Button("Cancel", action="screen.dismiss"),
                 id="rules-actions",
             ),
@@ -214,7 +235,7 @@ class RulesScreen(ModalScreen[object]):
         )
         yield Footer()
 
-    async def on_screen_resume(self) -> None:
+    def on_mount(self) -> None:
 
         from tuno.client.UnoApp import UnoApp
 
@@ -223,9 +244,8 @@ class RulesScreen(ModalScreen[object]):
 
         client = app.client
         assert client is not None
-        self.sub_title = client.get_connection_display()
 
-        await self.query_exactly_one(RulesForm).recompose()
+        self.sub_title = client.get_connection_display()
 
     @on(RulesForm.FormValidationChanged)
     def on_form_validation_changed(
@@ -236,6 +256,9 @@ class RulesScreen(ModalScreen[object]):
 
     @work(thread=True)
     def action_submit(self) -> None:
+
+        if self.readonly:
+            return
 
         from tuno.client.UnoApp import UnoApp
 
