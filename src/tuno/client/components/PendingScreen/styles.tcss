@@ -1,19 +1,10 @@
-InGameScreen {
+PendingScreen {
     layout: grid;
-    grid-size: 2 2;
+    grid-size: 1 2;
     grid-rows: 1fr 7;
-    grid-columns: 25 1fr;
-    grid-gutter: 0 1;
-
-    Sidebar {
-        margin-left: 1;
-    }
 
     Players, #actions {
-        margin-right: 1;
-    }
-
-    Sidebar, Players, #actions {
+        margin: 0 1;
         border: double $panel;
         border-title-color: $text-secondary;
 
@@ -21,6 +12,10 @@ InGameScreen {
             border: double $border;
             border-title-color: $text-primary;
         }
+    }
+
+    Players {
+        grid-size: 4;
     }
 
     #actions {

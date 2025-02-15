@@ -2,7 +2,6 @@ from os import environ
 from typing import cast
 
 from textual.app import ComposeResult
-from textual.message import Message
 from textual.screen import Screen
 from textual.validation import Regex
 from textual.widgets import Button, Footer, Header, Input
@@ -24,9 +23,6 @@ class ConnectScreen(Screen[object]):
     BINDINGS = [
         ("ctrl+j", "submit", "Submit"),
     ]
-
-    class Connected(Message):
-        pass
 
     def compose(self) -> ComposeResult:
 
@@ -115,7 +111,6 @@ class ConnectScreen(Screen[object]):
         submit_button.loading = True
 
         def on_success() -> None:
-            self.post_message(self.Connected())
             app.clear_notifications()
             app.notify("Connected to game server!")
 

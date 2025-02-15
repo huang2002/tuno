@@ -4,6 +4,7 @@ from functools import partialmethod
 from textual import on
 from textual.app import App
 from textual.message import Message
+from textual.screen import ModalScreen
 
 from tuno.client.config import (
     NOTIFICATION_TIMEOUT_DEFAULT,
@@ -14,6 +15,7 @@ from tuno.shared.sse_events import GameStateEvent
 
 from .components.ConnectScreen import ConnectScreen
 from .components.InGameScreen import InGameScreen
+from .components.PendingScreen import PendingScreen
 from .UnoClient import UnoClient
 
 
@@ -22,6 +24,7 @@ class UnoApp(App[object]):
     NOTIFICATION_TIMEOUT = NOTIFICATION_TIMEOUT_DEFAULT.total_seconds()
     MODES = {
         "connect": ConnectScreen,
+        "pending": PendingScreen,
         "in-game": InGameScreen,
     }
 
@@ -54,25 +57,24 @@ class UnoApp(App[object]):
                 client.subscription = None
                 self.log.debug("Subscription detached.")
 
-    @on(ConnectScreen.Connected)
-    def on_connected(self) -> None:
-
-        self.switch_mode("in-game")
-
-        screen = self.screen
-        assert isinstance(screen, InGameScreen)
-
-        client = self.client
-        assert client is not None
-
-        screen.game_state = client.game_state
-
     @on(GameStateUpdate)
-    def on_game_state_update(self, message: GameStateUpdate) -> None:
-        screen = self.screen
-        if isinstance(screen, InGameScreen):
-            screen.game_state = message.game_state
-            self.log.debug("Updated game state on InGameScreen.")
+    async def on_game_state_update(self, message: GameStateUpdate) -> None:
+
+        game_state = message.game_state
+
+        if game_state:
+            if game_state["started"]:
+                await self.switch_mode("in-game")
+            else:
+                await self.switch_mode("pending")
+            for modal_screen in self.query(ModalScreen):
+                modal_screen.dismiss()
+        else:
+            await self.switch_mode("connect")
+
+        if hasattr(self.screen, "game_state"):
+            setattr(self.screen, "game_state", game_state)
+            self.log.debug("Updated game state on current screen.")
 
     @on(CardsUpdate)
     def on_cards_update(self, message: CardsUpdate) -> None:

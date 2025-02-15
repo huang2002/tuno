@@ -10,45 +10,40 @@ from textual.widgets import Button, Footer, Header
 from tuno.client.components.Players import Players
 from tuno.client.components.RulesScreen import RulesScreen
 from tuno.client.utils.LoadingContext import LoadingContext
-from tuno.shared.deck import Deck
 from tuno.shared.sse_events import GameStateEvent
 
-from .Sidebar import Sidebar
 
-
-class InGameScreen(Screen[object]):
+class PendingScreen(Screen[object]):
 
     TITLE = "UNO"
     CSS_PATH = "styles.tcss"
     BINDINGS = [
+        ("ctrl+g", "start_game", "Start"),
         ("ctrl+r", "show_rules", "Rules"),
     ]
 
     game_state: reactive[GameStateEvent.DataType | None] = reactive(None)
-    cards: reactive[Deck] = reactive([])
 
     def compose(self) -> ComposeResult:
 
         actions_container = HorizontalScroll(
-            # TODO: play button
+            Button(
+                "Start",
+                id="action-start-game",
+                variant="success",
+                action="screen.start_game",
+            ),
             Button(
                 "Rules",
                 id="action-show-rules",
                 action="screen.show_rules",
-            ),
-            Button(
-                "Stop",
-                id="action-stop-game",
-                variant="error",
-                action="screen.stop_game",
             ),
             id="actions",
         )
         actions_container.border_title = "Actions"
 
         yield Header(show_clock=True)
-        yield Sidebar().data_bind(InGameScreen.game_state)
-        yield Players().data_bind(InGameScreen.game_state)
+        yield Players().data_bind(PendingScreen.game_state)
         yield actions_container
         yield Footer()
 
@@ -67,7 +62,7 @@ class InGameScreen(Screen[object]):
         self.app.push_screen(RulesScreen())
 
     @work(thread=True)
-    def action_stop_game(self) -> None:
+    def action_start_game(self) -> None:
 
         from tuno.client.UnoApp import UnoApp
 
@@ -77,5 +72,5 @@ class InGameScreen(Screen[object]):
         client = app.client
         assert client is not None
 
-        with LoadingContext("Stopping game...", app=app):
-            client.stop_game()
+        with LoadingContext("Starting game...", app=app):
+            client.start_game()
