@@ -47,7 +47,7 @@ class PendingScreen(Screen[object]):
         yield actions_container
         yield Footer()
 
-    def on_screen_resume(self) -> None:
+    def watch_game_state(self, game_state: GameStateEvent.DataType | None) -> None:
 
         from tuno.client.UnoApp import UnoApp
 
