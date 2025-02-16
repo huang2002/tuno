@@ -43,9 +43,9 @@ type Deck = list[Card]
 
 def format_card(card: Card) -> str:
     if card["type"] == "number":
-        return card["color"].title() + "-" + str(card["number"])
+        return card["color"].title() + "_" + str(card["number"])
     elif card["type"] == "function":
-        return card["color"].title() + "-" + card["effect"].title()
+        return card["color"].title() + "_" + card["effect"].title()
     elif card["type"] == "wild":
         return card["effect"].title()
     else:
