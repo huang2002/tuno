@@ -68,8 +68,8 @@ class Game:
         self.__rules = GameRules(
             player_capacity=DEFAULT_PLAYER_CAPACITY,
             initial_hand_size=DEFAULT_INITIAL_HAND_SIZE,
-            shuffle_players=False,
-            any_last_play=False,
+            shuffle_players=True,
+            any_last_play=True,
         )
         self.__draw_pile = []
         self.__discard_pile = []
