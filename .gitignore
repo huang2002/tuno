@@ -1,6 +1,6 @@
 __pycache__
 .venv
-.dist
+dist
 
 .vscode/*
 !.vscode/launch.json
