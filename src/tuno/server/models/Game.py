@@ -462,7 +462,7 @@ class Game:
             player_count = len(self.__players)
 
             if self.__draw_counter > 0:
-                next_player_index = self.__current_player_index = (
+                next_player_index = (
                     self.__current_player_index + self.__direction
                 ) % player_count
                 next_player = self.__players[next_player_index]
