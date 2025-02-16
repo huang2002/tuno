@@ -404,17 +404,27 @@ class Game:
                         skip_counter=self.__skip_counter,
                         rules=rules,
                     )
+                    self.set_lead_card_info(cards_out[-1], lead_color=play_color)
                 except:
                     player.cards = player_cards_backup
                     raise
                 else:
 
-                    self.__logger.info(f"Player#{player.name} played: {cards_out!r}")
+                    play_color_message = (
+                        f" (change color to {play_color})" if play_color else ""
+                    )
+                    self.__logger.info(
+                        f"Player#{player.name} played: {cards_out!r}"
+                        + play_color_message
+                    )
                     self.broadcast(
                         NotificationEvent(
                             NotificationEvent.DataType(
                                 title=f"{player.name}'s Play",
-                                message=", ".join(map(format_card, cards_out)),
+                                message=(
+                                    ", ".join(map(format_card, cards_out))
+                                    + play_color_message
+                                ),
                             )
                         )
                     )
@@ -446,7 +456,6 @@ class Game:
                             assert_never(card["type"])
 
                     self.__discard_pile.extend(cards_out)
-                    self.set_lead_card_info(cards_out[-1], lead_color=play_color)
 
             else:  # n_cards_out == 0
                 self.__logger.info(f"Player#{player.name} passed.")
