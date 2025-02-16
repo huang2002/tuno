@@ -53,7 +53,7 @@ class CardsScreen(ModalScreen[object]):
                     id="cards-color-select-label",
                 )
                 yield Select[str](
-                    ((color, color) for color in basic_card_colors),
+                    ((color.title(), color) for color in basic_card_colors),
                     id="cards-color-select",
                     prompt="(none)",
                     tooltip="Color to change to.",

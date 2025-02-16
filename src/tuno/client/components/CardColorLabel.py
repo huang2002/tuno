@@ -24,5 +24,5 @@ class CardColorLabel(Label):
             self.tooltip = None
         else:
             self.styles.background = f"{data} 90%"
-            self.update(data)
-            self.tooltip = data
+            self.update(data.title())
+            self.tooltip = data.title()

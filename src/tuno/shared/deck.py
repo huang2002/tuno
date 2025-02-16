@@ -44,10 +44,10 @@ type Deck = list[Card]
 def format_card(card: Card) -> str:
     match card["type"]:
         case "number":
-            return card["color"] + "-" + str(card["number"])
+            return card["color"].title() + "-" + str(card["number"])
         case "function":
-            return card["color"] + "-" + card["effect"]
+            return card["color"].title() + "-" + card["effect"].title()
         case "wild":
-            return card["effect"]
+            return card["effect"].title()
         case _ as card_type:
             assert_never(card_type)

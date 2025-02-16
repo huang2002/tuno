@@ -28,10 +28,6 @@ class CardLabel(Label):
         self.styles.background = f"{data['color']} 90%"
 
         content = ""
-        if data["color"] == "black":
-            content += ""
-        else:
-            content += data["color"].title() + " "
         if data["type"] == "number":
             content += str(data["number"])
         else:
