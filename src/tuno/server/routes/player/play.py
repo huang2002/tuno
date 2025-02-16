@@ -13,7 +13,7 @@ logger = Logger(__name__)
 
 def setup(blueprint: Blueprint) -> None:
 
-    @blueprint.post("/<player_name>")
+    @blueprint.post("/<player_name>/play")
     def play(player_name: str) -> ResponseReturnValue:
 
         check_player_name(player_name)
