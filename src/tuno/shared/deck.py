@@ -42,12 +42,11 @@ type Deck = list[Card]
 
 
 def format_card(card: Card) -> str:
-    match card["type"]:
-        case "number":
-            return card["color"].title() + "-" + str(card["number"])
-        case "function":
-            return card["color"].title() + "-" + card["effect"].title()
-        case "wild":
-            return card["effect"].title()
-        case _ as card_type:
-            assert_never(card_type)
+    if card["type"] == "number":
+        return card["color"].title() + "-" + str(card["number"])
+    elif card["type"] == "function":
+        return card["color"].title() + "-" + card["effect"].title()
+    elif card["type"] == "wild":
+        return card["effect"].title()
+    else:
+        assert_never(card["type"])
