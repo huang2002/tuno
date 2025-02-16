@@ -15,6 +15,7 @@ class Player:
 
     name: str
     cards: Deck
+    last_result: int
     message_queue: Queue[ServerSentEvent]
     lock: RLock
     connected: bool  # set by game watcher
@@ -27,6 +28,7 @@ class Player:
 
         self.name = name
         self.cards = []
+        self.last_result = -1
         self.message_queue = Queue(PLAYER_MESSAGE_QUEUE_SIZE)
         self.lock = RLock()
         self.connected = False

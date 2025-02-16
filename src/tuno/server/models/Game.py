@@ -107,7 +107,9 @@ class Game:
                         GameStateEvent.PlayerDataType(
                             name=player.name,
                             connected=player.connected,
-                            card_count=(len(player.cards) if started else -1),
+                            card_count=(
+                                len(player.cards) if started else player.last_result
+                            ),
                         )
                         for player in self.__players
                     ],
@@ -505,6 +507,9 @@ class Game:
             self.__started = False
             self.__lead_color = None
             self.__lead_card = None
+
+            for player in self.__players:
+                player.last_result = len(player.cards)
 
             message = format_optional_operator(
                 "Game stopped",
