@@ -16,7 +16,11 @@ from tuno.server.config import (
 from tuno.server.utils.checkers import check_player_name
 from tuno.server.utils.Logger import Logger
 from tuno.shared.loop import loop
-from tuno.shared.sse_events import EndOfConnectionEvent, SubscriptionChangeEvent
+from tuno.shared.sse_events import (
+    EndOfConnectionEvent,
+    GameStateEvent,
+    SubscriptionChangeEvent,
+)
 
 logger = Logger(__name__)
 
@@ -46,13 +50,13 @@ def setup(blueprint: Blueprint) -> None:
                 f"(subscription_token: {subscription_token})"
             )
 
-            # send current game state
-            init_event = game.get_game_state_event()
+            # send initial states
             with player.message_context():
-                yield init_event.to_sse()
+                yield game.get_game_state_event().to_sse()
+                yield player.get_cards_event().to_sse()
             logger.debug(
-                f"Sent current game state to player#{player_name} "
-                f"(subscription_token: {subscription_token}): " + repr(init_event)
+                f"Sent initial states to player#{player_name}. "
+                f"(subscription_token: {subscription_token})"
             )
 
             # slow iteration detection
