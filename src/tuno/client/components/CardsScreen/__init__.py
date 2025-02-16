@@ -122,7 +122,7 @@ class CardsScreen(ModalScreen[object]):
                     else cast(str, color_select_value)
                 ),
             )
-            self.dismiss()
+            self.app.call_from_thread(self.dismiss)
 
     def action_reset(self) -> None:
 
