@@ -7,7 +7,7 @@ from requests import RequestException, get, post, put
 from requests_sse import EventSource
 from textual import log
 
-from tuno.client.config import SSE_TIMEOUT
+from tuno.client.config import SSE_MAX_RETRIES, SSE_TIMEOUT
 from tuno.client.event_handlers import EventHandlerMap, load_event_handler_map
 from tuno.client.utils.ApiContext import ApiContext
 from tuno.shared.deck import Deck
@@ -87,7 +87,7 @@ class UnoClient:
 
         event_source = EventSource(
             url,
-            max_connect_retry=3,
+            max_connect_retry=SSE_MAX_RETRIES,
             timeout=SSE_TIMEOUT.total_seconds(),
         )
 

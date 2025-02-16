@@ -2,7 +2,8 @@ from datetime import timedelta
 from typing import Final
 
 # -- Connection Config --
-SSE_TIMEOUT = timedelta(seconds=30)
+SSE_MAX_RETRIES: Final = 2
+SSE_TIMEOUT = timedelta(seconds=10)
 
 # -- Notification Config --
 NOTIFICATION_TIMEOUT_DEFAULT = timedelta(seconds=3)
