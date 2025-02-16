@@ -2,7 +2,7 @@ from collections.abc import Mapping, Sequence
 from random import shuffle
 from threading import RLock, Thread
 from time import monotonic
-from typing import TYPE_CHECKING, Literal, assert_never
+from typing import Literal, assert_never
 
 from tuno.server.config import (
     GAME_WATCHER_INTERVAL,
@@ -24,14 +24,10 @@ from tuno.server.utils.create_deck import create_deck
 from tuno.server.utils.format_optional_operator import format_optional_operator
 from tuno.server.utils.Logger import Logger
 from tuno.shared.check_play import check_play
-from tuno.shared.constraints import (
-    DEFAULT_INITIAL_HAND_SIZE,
-    DEFAULT_PLAYER_CAPACITY,
-    MIN_PLAYER_CAPACITY,
-)
+from tuno.shared.constraints import MIN_PLAYER_CAPACITY
 from tuno.shared.deck import BasicCardColor, Card, Deck, format_card
 from tuno.shared.loop import loop
-from tuno.shared.rules import GameRules, check_rule_update
+from tuno.shared.rules import GameRules, check_rule_update, create_game_rules
 from tuno.shared.sse_events import (
     EndOfConnectionEvent,
     GameStateEvent,
@@ -65,12 +61,7 @@ class Game:
 
         self.__players = []
         self.__started = False
-        self.__rules = GameRules(
-            player_capacity=DEFAULT_PLAYER_CAPACITY,
-            initial_hand_size=DEFAULT_INITIAL_HAND_SIZE,
-            shuffle_players=True,
-            any_last_play=True,
-        )
+        self.__rules = create_game_rules()
         self.__draw_pile = []
         self.__discard_pile = []
         self.__current_player_index = -1

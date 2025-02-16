@@ -13,11 +13,7 @@ from textual.widget import Widget
 from textual.widgets import Button, Footer, Header, Input, Label, Switch
 
 from tuno.client.utils.LoadingContext import LoadingContext
-from tuno.shared.rules import (
-    GameRules,
-    RuleValidationException,
-    get_rule_annotation,
-)
+from tuno.shared.rules import RuleValidationException, rule_metadata_map
 
 
 class RulesFormItem(Widget):
@@ -39,7 +35,7 @@ class RulesFormItem(Widget):
         self.rule_key = rule_key
         self.focused_descendants = set()
 
-        rule_annotation = get_rule_annotation(rule_key)
+        rule_annotation = rule_metadata_map[rule_key]
         self.rule_type = rule_annotation.type
         self.rule_hint = rule_annotation.hint
 
@@ -170,7 +166,7 @@ class RulesForm(VerticalScroll):
         return len(self.invalid_inputs) == 0
 
     def compose(self) -> ComposeResult:
-        for key in GameRules.__annotations__.keys():
+        for key in rule_metadata_map.keys():
             yield RulesFormItem(key, readonly=self.readonly)
 
     def on_mount(self) -> None:

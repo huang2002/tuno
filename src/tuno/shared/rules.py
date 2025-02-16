@@ -1,16 +1,22 @@
 from abc import abstractmethod
+from collections.abc import Mapping
+from dataclasses import dataclass
 from inspect import get_annotations
 from typing import (
     Annotated,
+    Any,
     NamedTuple,
     Protocol,
     TypedDict,
+    cast,
     get_origin,
     runtime_checkable,
 )
 
 from tuno.server.exceptions import ApiException
 from tuno.shared.constraints import (
+    DEFAULT_INITIAL_HAND_SIZE,
+    DEFAULT_PLAYER_CAPACITY,
     MAX_INITIAL_HAND_SIZE,
     MAX_PLAYER_CAPACITY,
     MIN_INITIAL_HAND_SIZE,
@@ -59,86 +65,114 @@ class IntRangeRuleValidator(RuleValidator):
             )
 
 
+class RuleMetadataWithoutType(NamedTuple):
+    default: object
+    hint: str
+    validator: RuleValidator | None
+
+
 class GameRules(TypedDict):
 
     player_capacity: Annotated[
         int,
-        f"{MIN_PLAYER_CAPACITY}~{MAX_PLAYER_CAPACITY}",
-        IntRangeRuleValidator(
-            "player_capacity",
-            MIN_PLAYER_CAPACITY,
-            MAX_PLAYER_CAPACITY,
+        RuleMetadataWithoutType(
+            default=DEFAULT_PLAYER_CAPACITY,
+            hint=f"{MIN_PLAYER_CAPACITY}~{MAX_PLAYER_CAPACITY}",
+            validator=IntRangeRuleValidator(
+                "player_capacity",
+                MIN_PLAYER_CAPACITY,
+                MAX_PLAYER_CAPACITY,
+            ),
         ),
     ]
 
     shuffle_players: Annotated[
         bool,
-        "shuffle players before starting",
-        None,
+        RuleMetadataWithoutType(
+            default=True,
+            hint="shuffle players before starting",
+            validator=None,
+        ),
     ]
 
     initial_hand_size: Annotated[
         int,
-        f"{MIN_INITIAL_HAND_SIZE}~{MAX_INITIAL_HAND_SIZE}",
-        IntRangeRuleValidator(
-            "initial_hand_size",
-            MIN_INITIAL_HAND_SIZE,
-            MAX_INITIAL_HAND_SIZE,
+        RuleMetadataWithoutType(
+            default=DEFAULT_INITIAL_HAND_SIZE,
+            hint=f"{MIN_INITIAL_HAND_SIZE}~{MAX_INITIAL_HAND_SIZE}",
+            validator=IntRangeRuleValidator(
+                "initial_hand_size",
+                MIN_INITIAL_HAND_SIZE,
+                MAX_INITIAL_HAND_SIZE,
+            ),
         ),
     ]
 
     any_last_play: Annotated[
         bool,
-        "allow non-number card as last play",
-        None,
+        RuleMetadataWithoutType(
+            default=True,
+            hint="allow non-number card as last play",
+            validator=None,
+        ),
     ]
 
 
-class RuleAnnotation(NamedTuple):
+@dataclass
+class RuleMetadata:
     type: type
+    default: object
     hint: str
     validator: RuleValidator | None
 
 
-def get_rule_annotation(key: str) -> RuleAnnotation:
+def __parse_rule_metadata(type_annotation: object) -> RuleMetadata:
 
-    annotations = get_annotations(GameRules)
-
-    if key not in annotations:
-        raise RuleValidationException(f"Unknown rule: {key}")
-
-    type_annotation = annotations[key]
     if get_origin(type_annotation) is not Annotated:
         raise RuleValidationException(f"Invalid rule annotation: {type_annotation}")
 
-    type_metadata: tuple[object, object, object] = type_annotation.__metadata__
-    if (
-        (len(type_metadata) != 2)
-        or (not isinstance(type_metadata[0], str))
-        or not (
-            (type_metadata[1] is None) or isinstance(type_metadata[1], RuleValidator)
+    type_metadata: tuple[object, ...] = type_annotation.__metadata__  # type: ignore[attr-defined]
+    if (len(type_metadata) != 1) or (
+        not isinstance(
+            rule_metadata_without_type := type_metadata[0],
+            RuleMetadataWithoutType,
         )
     ):
-        raise RuleValidationException(
-            f"Invalid metadata for rule `{key}`: {type_metadata!r}"
-        )
+        raise RuntimeError(f"Invalid metadata: {type_metadata!r}")
 
-    return RuleAnnotation(
-        type=type_annotation.__origin__,
-        hint=type_metadata[0],
-        validator=type_metadata[1],
+    return RuleMetadata(
+        type=type_annotation.__origin__,  # type: ignore[attr-defined]
+        **rule_metadata_without_type._asdict(),
     )
+
+
+rule_metadata_map: Mapping[str, RuleMetadata] = {
+    key: __parse_rule_metadata(type_annotation)
+    for key, type_annotation in get_annotations(GameRules).items()
+}
+
+
+def create_game_rules() -> GameRules:
+    rules: GameRules = GameRules(
+        **{  # type: ignore[typeddict-item]
+            key: cast(Any, metadata.default)
+            for key, metadata in rule_metadata_map.items()
+        },
+    )
+    return rules
 
 
 def check_rule_update(key: str, value: object) -> None:
 
-    rule_annotation = get_rule_annotation(key)
+    rule_metadata = rule_metadata_map.get(key, None)
+    if not rule_metadata:
+        raise RuleValidationException(f"Unknown rule: {key}")
 
-    if not isinstance(value, rule_annotation.type):
+    if not isinstance(value, rule_metadata.type):
         raise RuleValidationException(
             f"Invalid type for rule `{key}`: "
-            f"expected {rule_annotation.type}, got {type(value)}"
+            f"expected {rule_metadata.type}, got {type(value)}"
         )
 
-    if rule_annotation.validator:
-        rule_annotation.validator.validate(value)
+    if rule_metadata.validator:
+        rule_metadata.validator.validate(value)
