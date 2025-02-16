@@ -11,6 +11,7 @@ class InvalidPlayException(ApiException):
 
 def check_play(
     play: Deck,
+    play_color: BasicCardColor | None,
     *,
     lead_color: BasicCardColor,
     lead_card: Card,
@@ -53,6 +54,11 @@ def check_play(
         )
 
     else:
+
+        if not play_color:
+            raise InvalidPlayException(
+                "Wild cards must be played with a color claimed."
+            )
 
         return
 

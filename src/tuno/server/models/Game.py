@@ -398,6 +398,7 @@ class Game:
                         raise InvalidLeadCardInfoException(lead_card, lead_color)
                     check_play(
                         cards_out,
+                        play_color,
                         lead_color=lead_color,
                         lead_card=lead_card,
                         skip_counter=self.__skip_counter,
