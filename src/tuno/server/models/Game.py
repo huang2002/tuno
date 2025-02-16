@@ -450,6 +450,14 @@ class Game:
             else:  # n_cards_out == 0
                 self.__logger.info(f"Player#{player.name} passed.")
                 self.draw_cards(1, player=player, allow_shuffle=True)
+                self.broadcast(
+                    NotificationEvent(
+                        NotificationEvent.DataType(
+                            title=f"{player.name}'s Play",
+                            message="Pass",
+                        )
+                    )
+                )
 
             if len(player.cards) == 0:
                 if (
