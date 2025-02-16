@@ -43,7 +43,7 @@ files = ["requirements.txt"]
 dev = ["requirements-dev.txt"]
 
 [tool.hatch.build.targets.sdist]
-exclude = ["/.vscode"]
+exclude = ["/.vscode", "/git-hooks"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/tuno"]
