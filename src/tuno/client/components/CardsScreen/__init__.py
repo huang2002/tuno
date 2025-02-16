@@ -45,7 +45,7 @@ class CardsScreen(ModalScreen[object]):
 
         yield Header(show_clock=True)
         with Vertical(id="cards-window"):
-            yield Label("Select cards to play:", id="cards-title")
+            yield Label("Cards to play: (Submit none to pass.)", id="cards-title")
             yield VerticalScroll(id="cards-container")
             with Horizontal(id="cards-color-select-container"):
                 yield Label(
