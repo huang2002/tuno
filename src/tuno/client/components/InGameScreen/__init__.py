@@ -7,6 +7,7 @@ from textual.reactive import reactive
 from textual.screen import Screen
 from textual.widgets import Button, Footer, Header
 
+from tuno.client.components.CardsScreen import CardsScreen
 from tuno.client.components.Players import Players
 from tuno.client.components.RulesScreen import RulesScreen
 from tuno.client.utils.LoadingContext import LoadingContext
@@ -21,6 +22,7 @@ class InGameScreen(Screen[object]):
     TITLE = "UNO"
     CSS_PATH = "styles.tcss"
     BINDINGS = [
+        ("ctrl+t", "play", "Play"),
         ("ctrl+r", "show_rules", "Rules"),
     ]
 
@@ -30,10 +32,16 @@ class InGameScreen(Screen[object]):
     def compose(self) -> ComposeResult:
 
         actions_container = HorizontalScroll(
-            # TODO: play button
+            Button(
+                "Play",
+                id="action-show-play",
+                variant="primary",
+                action="screen.play",
+            ),
             Button(
                 "Rules",
                 id="action-show-rules",
+                variant="warning",
                 action="screen.show_rules",
             ),
             Button(
@@ -62,6 +70,9 @@ class InGameScreen(Screen[object]):
         client = app.client
         assert client is not None
         self.sub_title = client.get_connection_display()
+
+    def action_play(self) -> None:
+        self.app.push_screen(CardsScreen())
 
     def action_show_rules(self) -> None:
         self.app.push_screen(RulesScreen(readonly=True))

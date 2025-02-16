@@ -31,16 +31,5 @@ InGameScreen {
             min-width: 11;
             margin: 0 3;
         }
-
-        Button#action-show-rules {
-            border-top: tall $secondary-lighten-2;
-            border-bottom: tall $secondary-darken-2;
-            background: $secondary;
-
-            &:hover {
-                background: $secondary-darken-1;
-                border-top: tall $primary;
-            }
-        }
     }
 }

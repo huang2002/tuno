@@ -1,0 +1,58 @@
+CardsScreen {
+    align-horizontal: center;
+    background: $background 80%;
+
+    #cards-window {
+        margin: 2 0;
+        max-width: 88;
+        padding: 0 2;
+        layout: grid;
+        grid-size: 1 4;
+        grid-rows: 1 1fr auto auto;
+        grid-gutter: 1;
+        border-top: tall $panel;
+        border-bottom: tall $panel;
+        background: $boost;
+
+        #cards-title {
+            width: 100%;
+            content-align-horizontal: center;
+            color: $text-primary;
+        }
+
+        #cards-container {
+            layout: grid;
+            grid-size: 3;
+            grid-gutter: 0 1;
+            grid-rows: 3;
+            padding: 0 1;
+            border: hkey $border-blurred;
+            background: $boost;
+
+            &:focus {
+                border: hkey $border;
+            }
+        }
+
+        #cards-color-select-container {
+            align-horizontal: center;
+
+            #cards-color-select-label {
+                height: 100%;
+                content-align-vertical: middle;
+            }
+
+            #cards-color-select {
+                width: 16;
+            }
+        }
+
+        #cards-actions {
+            align-horizontal: center;
+
+            Button {
+                margin: 0 2;
+            }
+        }
+    }
+}
