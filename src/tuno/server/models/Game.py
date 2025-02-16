@@ -29,7 +29,7 @@ from tuno.shared.constraints import (
     DEFAULT_PLAYER_CAPACITY,
     MIN_PLAYER_CAPACITY,
 )
-from tuno.shared.deck import BasicCardColor, Card, Deck
+from tuno.shared.deck import BasicCardColor, Card, Deck, format_card
 from tuno.shared.loop import loop
 from tuno.shared.rules import GameRules, check_rule_update
 from tuno.shared.sse_events import (
@@ -407,6 +407,14 @@ class Game:
                 else:
 
                     self.__logger.info(f"Player#{player.name} played: {cards_out!r}")
+                    self.broadcast(
+                        NotificationEvent(
+                            NotificationEvent.DataType(
+                                title=f"{player.name}'s Play",
+                                message=", ".join(map(format_card, cards_out)),
+                            )
+                        )
+                    )
 
                     assert n_cards_out > 0
 

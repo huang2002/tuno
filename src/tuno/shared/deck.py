@@ -1,4 +1,4 @@
-from typing import Literal, TypedDict, get_args
+from typing import Literal, TypedDict, assert_never, get_args
 
 type BasicCardColor = Literal["red", "green", "blue", "yellow"]
 basic_card_colors: tuple[BasicCardColor, ...] = get_args(BasicCardColor.__value__)
@@ -39,3 +39,15 @@ class WildCard(TypedDict):
 
 type Card = NumberCard | FunctionCard | WildCard
 type Deck = list[Card]
+
+
+def format_card(card: Card) -> str:
+    match card["type"]:
+        case "number":
+            return card["color"] + "-" + str(card["number"])
+        case "function":
+            return card["color"] + "-" + card["effect"]
+        case "wild":
+            return card["effect"]
+        case _ as card_type:
+            assert_never(card_type)
