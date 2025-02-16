@@ -468,7 +468,8 @@ class Game:
                     self.__draw_counter = 0
 
                 self.__current_player_index = (
-                    self.__current_player_index + self.__direction * self.__skip_counter
+                    self.__current_player_index
+                    + self.__direction * (self.__skip_counter + 1)
                 ) % player_count
                 self.__skip_counter = 0
 
