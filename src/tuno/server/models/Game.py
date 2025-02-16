@@ -383,98 +383,104 @@ class Game:
 
             player_cards_backup = player.cards.copy()
             cards_out = player.give_out_cards(card_ids)
+            n_cards_out = len(cards_out)
 
             lead_color = self.__lead_color
             lead_card = self.__lead_card
             rules = self.__rules
 
-            try:
-                if not (lead_color and lead_card):
-                    raise InvalidLeadCardInfoException(lead_card, lead_color)
-                check_play(
-                    cards_out,
-                    lead_color=lead_color,
-                    lead_card=lead_card,
-                    skip_counter=self.__skip_counter,
-                    rules=rules,
-                )
-            except:
-                player.cards = player_cards_backup
-                raise
-            else:
+            if n_cards_out > 0:
 
-                self.__logger.info(f"Player#{player.name} played: {cards_out!r}")
+                try:
+                    if not (lead_color and lead_card):
+                        raise InvalidLeadCardInfoException(lead_card, lead_color)
+                    check_play(
+                        cards_out,
+                        lead_color=lead_color,
+                        lead_card=lead_card,
+                        skip_counter=self.__skip_counter,
+                        rules=rules,
+                    )
+                except:
+                    player.cards = player_cards_backup
+                    raise
+                else:
 
-                n_cards_out = len(cards_out)
-                assert n_cards_out > 0
+                    self.__logger.info(f"Player#{player.name} played: {cards_out!r}")
 
-                for card in cards_out:
-                    if card["type"] == "number":
-                        continue
-                    elif card["type"] == "function":
-                        if card["effect"] == "+2":
-                            self.__draw_counter += 2
-                            self.__skip_counter += 1
-                        elif card["effect"] == "skip":
-                            self.__skip_counter += 1
-                        elif card["effect"] == "reverse":
-                            self.__direction = -self.__direction
+                    assert n_cards_out > 0
+
+                    for card in cards_out:
+                        if card["type"] == "number":
+                            continue
+                        elif card["type"] == "function":
+                            if card["effect"] == "+2":
+                                self.__draw_counter += 2
+                                self.__skip_counter += 1
+                            elif card["effect"] == "skip":
+                                self.__skip_counter += 1
+                            elif card["effect"] == "reverse":
+                                self.__direction = -self.__direction
+                            else:
+                                assert_never(card["effect"])
+                        elif card["type"] == "wild":
+                            if card["effect"] == "+4":
+                                self.__draw_counter += 4
+                                self.__skip_counter += 1
+                            elif card["effect"] == "color":
+                                pass
+                            else:
+                                assert_never(card["effect"])
                         else:
-                            assert_never(card["effect"])
-                    elif card["type"] == "wild":
-                        if card["effect"] == "+4":
-                            self.__draw_counter += 4
-                            self.__skip_counter += 1
-                        elif card["effect"] == "color":
-                            pass
-                        else:
-                            assert_never(card["effect"])
-                    else:
-                        assert_never(card["type"])
+                            assert_never(card["type"])
 
-                self.__discard_pile.extend(cards_out)
-                self.set_lead_card_info(cards_out[-1], lead_color=play_color)
+                    self.__discard_pile.extend(cards_out)
+                    self.set_lead_card_info(cards_out[-1], lead_color=play_color)
 
-                if len(player.cards) == 0:
-                    if (
-                        (not rules["any_last_play"])
-                        and (n_cards_out == 1)
-                        and (cards_out[0]["type"] != "number")
-                    ):
-                        self.draw_cards(1, player=player, allow_shuffle=True)
-                    else:
-                        self.broadcast(
-                            NotificationEvent(
-                                NotificationEvent.DataType(
-                                    title="Game Ended",
-                                    message=f"Player#{player.name} won!",
-                                )
+            else:  # n_cards_out == 0
+                self.__logger.info(f"Player#{player.name} passed.")
+                self.draw_cards(1, player=player, allow_shuffle=True)
+
+            if len(player.cards) == 0:
+                if (
+                    (not rules["any_last_play"])
+                    and (n_cards_out == 1)
+                    and (cards_out[0]["type"] != "number")
+                ):
+                    self.draw_cards(1, player=player, allow_shuffle=True)
+                else:
+                    self.broadcast(
+                        NotificationEvent(
+                            NotificationEvent.DataType(
+                                title="Game Ended",
+                                message=f"Player#{player.name} won!",
                             )
                         )
-                        return self.stop(operator_name=None, operator_is_player=False)
-
-                player_count = len(self.__players)
-
-                if self.__draw_counter > 0:
-                    next_player_index = self.__current_player_index = (
-                        self.__current_player_index + self.__direction
-                    ) % player_count
-                    next_player = self.__players[next_player_index]
-                    self.draw_cards(
-                        self.__draw_counter,
-                        player=next_player,
-                        allow_shuffle=True,
                     )
-                    self.__draw_counter = 0
+                    return self.stop(operator_name=None, operator_is_player=False)
 
-                self.__current_player_index = (
-                    self.__current_player_index
-                    + self.__direction * (self.__skip_counter + 1)
+            player_count = len(self.__players)
+
+            if self.__draw_counter > 0:
+                next_player_index = self.__current_player_index = (
+                    self.__current_player_index + self.__direction
                 ) % player_count
-                self.__skip_counter = 0
+                next_player = self.__players[next_player_index]
+                self.draw_cards(
+                    self.__draw_counter,
+                    player=next_player,
+                    allow_shuffle=True,
+                )
+                self.__draw_counter = 0
 
-                player.message_queue.put(player.get_cards_event())
-                self.broadcast(self.get_game_state_event())
+            self.__current_player_index = (
+                self.__current_player_index
+                + self.__direction * (self.__skip_counter + 1)
+            ) % player_count
+            self.__skip_counter = 0
+
+            player.message_queue.put(player.get_cards_event())
+            self.broadcast(self.get_game_state_event())
 
     def stop(
         self,
