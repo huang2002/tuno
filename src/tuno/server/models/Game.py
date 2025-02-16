@@ -334,6 +334,7 @@ class Game:
             for player in self.__players:
                 if not self.draw_cards(initial_hand_size, player=player):
                     return
+                player.message_queue.put(player.get_cards_event())
 
             # -- set lead card --
             lead_card: Card | None = None
