@@ -126,12 +126,21 @@ class RuleMetadata:
     validator: RuleValidator | None
 
 
+@runtime_checkable
+class AnnotatedType(Protocol):
+    """A partial type for interacting with builtin _AnnotatedAlias, which is not exported."""
+
+    __origin__: type
+    __metadata__: tuple[object, ...]
+
+
 def __parse_rule_metadata(type_annotation: object) -> RuleMetadata:
 
     if get_origin(type_annotation) is not Annotated:
         raise RuleValidationException(f"Invalid rule annotation: {type_annotation}")
+    assert isinstance(type_annotation, AnnotatedType)
 
-    type_metadata: tuple[object, ...] = type_annotation.__metadata__  # type: ignore[attr-defined]
+    type_metadata = type_annotation.__metadata__
     if (len(type_metadata) != 1) or (
         not isinstance(
             rule_metadata_without_type := type_metadata[0],
@@ -141,8 +150,10 @@ def __parse_rule_metadata(type_annotation: object) -> RuleMetadata:
         raise RuntimeError(f"Invalid metadata: {type_metadata!r}")
 
     return RuleMetadata(
-        type=type_annotation.__origin__,  # type: ignore[attr-defined]
-        **rule_metadata_without_type._asdict(),
+        type=type_annotation.__origin__,
+        default=rule_metadata_without_type.default,
+        hint=rule_metadata_without_type.hint,
+        validator=rule_metadata_without_type.validator,
     )
 
 
@@ -153,13 +164,13 @@ rule_metadata_map: Mapping[str, RuleMetadata] = {
 
 
 def create_game_rules() -> GameRules:
-    rules: GameRules = GameRules(
-        **{  # type: ignore[typeddict-item]
+    return cast(
+        GameRules,
+        {
             key: cast(Any, metadata.default)
             for key, metadata in rule_metadata_map.items()
         },
     )
-    return rules
 
 
 def check_rule_update(key: str, value: object) -> None:
