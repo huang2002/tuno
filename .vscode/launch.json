@@ -22,7 +22,7 @@
             "request": "launch",
             "module": "tuno.client",
             "env": {
-                "UNO_CONNECTION": "vscode@localhost:5000"
+                "TUNO_CONNECTION": "vscode@localhost:5000"
             },
             "cwd": "${workspaceFolder}/src",
             "console": "externalTerminal",
