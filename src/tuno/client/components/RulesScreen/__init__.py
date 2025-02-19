@@ -85,7 +85,7 @@ class RulesFormItem(Widget):
         current_rules = client.game_state["rules"]
         current_value = current_rules[rule_key]  # type: ignore[literal-required]
         input_widget: Widget
-        if rule_type is int:
+        if rule_type in (int, float):
             input_widget = Input(
                 value=str(current_value),
                 type="integer",

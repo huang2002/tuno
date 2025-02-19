@@ -10,6 +10,7 @@ from typing import (
     TypedDict,
     cast,
     get_origin,
+    override,
     runtime_checkable,
 )
 
@@ -43,10 +44,14 @@ class RuleValidationException(ApiException):
         super().__init__(400, message)
 
 
-class IntRangeRuleValidator(RuleValidator):
+class RangeRuleValidator(RuleValidator):
 
     min: float
     max: float
+
+    @property
+    @abstractmethod
+    def _type(self) -> type[int | float]: ...
 
     def __init__(self, rule_name: str, min: float, max: float) -> None:
         super().__init__(rule_name)
@@ -54,15 +59,33 @@ class IntRangeRuleValidator(RuleValidator):
         self.max = max
 
     def validate(self, value: object) -> None:
-        if not isinstance(value, int):
+        if not isinstance(value, self._type):
             raise RuleValidationException(
-                f"{self.rule_name} must be an integer, " f"got: {type(value).__name__}"
+                f"{self.rule_name} must be of type {self._type.__name__}, "
+                f"got: {type(value).__name__}"
             )
+        assert isinstance(value, (int, float))
         if not self.min <= value <= self.max:
             raise RuleValidationException(
                 f"{self.rule_name} must be in range "
                 f"[{self.min}, {self.max}], got: {value}"
             )
+
+
+class IntRangeRuleValidator(RangeRuleValidator):
+
+    @property
+    @override
+    def _type(self) -> type[int]:
+        return int
+
+
+class FloatRangeRuleValidator(RangeRuleValidator):
+
+    @property
+    @override
+    def _type(self) -> type[float]:
+        return float
 
 
 class RuleMetadataWithoutType(NamedTuple):
