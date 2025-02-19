@@ -285,6 +285,8 @@ class RulesScreen(ModalScreen[object]):
         with LoadingContext("Updating rules...", app=app):
             client.update_rules(modified_rules)
 
+        app.call_from_thread(self.dismiss)
+
     def action_reset(self) -> None:
 
         from tuno.client.UnoApp import UnoApp
