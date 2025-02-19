@@ -5,7 +5,7 @@ import click
 from tuno.client import start_client
 from tuno.server import start_server
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 
 @click.group(
