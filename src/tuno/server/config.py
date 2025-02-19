@@ -5,6 +5,9 @@ from typing import Final
 DEFAULT_HOST: Final = "0.0.0.0"
 DEFAULT_PORT: Final = 5000
 
+# -- Environment Config --
+ENV_KEY_LOG_LEVEL: str = "TUNO_LOG_LEVEL"
+
 # -- Connection Config --
 SUBSCRIPTION_TOKEN_BYTES: Final = 4  # each byte becomes 2 hex digits
 SUBSCRIPTION_LOOP_INTERVAL = timedelta(milliseconds=200)

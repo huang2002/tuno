@@ -12,7 +12,7 @@
             "env": {
                 "FLASK_APP": "tuno.server",
                 "FLASK_DEBUG": "1",
-                "UNO_LOG_LEVEL": "DEBUG"
+                "TUNO_LOG_LEVEL": "DEBUG"
             },
             "args": ["run", "--no-debugger", "--no-reload"]
         },

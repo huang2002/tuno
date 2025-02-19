@@ -8,10 +8,19 @@ from tuno.shared.constraints import (
     MIN_PLAYER_CAPACITY,
 )
 
-from .config import DEFAULT_HOST, DEFAULT_PORT
+from .config import DEFAULT_HOST, DEFAULT_PORT, ENV_KEY_LOG_LEVEL
 
 
-def create_app() -> Flask:
+def create_app(*, log_level: LogLevel | None = None) -> Flask:
+
+    from os import environ
+
+    if log_level is None:
+        env_log_level = environ.get(ENV_KEY_LOG_LEVEL, "")
+        if env_log_level:
+            log_level = LogLevel[env_log_level]
+    if log_level:
+        Logger.level = log_level
 
     from .models.Game import game
     from .routes import load_routes
@@ -56,7 +65,7 @@ def create_app() -> Flask:
     "-l",
     "--log-level",
     type=click.Choice([l.name for l in LogLevel], case_sensitive=False),
-    envvar="UNO_LOG_LEVEL",
+    envvar=ENV_KEY_LOG_LEVEL,
     default=LogLevel.INFO.name,
     show_default=True,
     show_envvar=True,
@@ -71,8 +80,6 @@ def start_server(
 ) -> None:
     """Start game server."""
 
-    Logger.level = LogLevel[log_level]
-
     from .models.Game import game
 
     game.update_rules(
@@ -83,5 +90,5 @@ def start_server(
         operator_is_player=False,
     )
 
-    app = create_app()
+    app = create_app(log_level=LogLevel[log_level])
     app.run(host=host, port=port)

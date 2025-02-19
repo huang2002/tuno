@@ -57,7 +57,7 @@ dev-client = "textual run --dev tuno.client.UnoApp:UnoApp"
 
 [tool.hatch.envs.dev.env-vars]
 UNO_CONNECTION = "test@localhost:5000"
-UNO_LOG_LEVEL = "DEBUG"
+TUNO_LOG_LEVEL = "DEBUG"
 
 [tool.mypy]
 files = "src/tuno"
