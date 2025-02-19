@@ -83,7 +83,8 @@ class Game:
     def broadcast(self, event: ServerSentEvent) -> None:
         with self.lock:
             for player in self.__players:
-                player.message_queue.put(event)
+                if not player.is_bot:
+                    player.message_queue.put(event)
 
     def get_game_state_event(self) -> GameStateEvent:
         with self.lock:
@@ -189,7 +190,7 @@ class Game:
                     self.__logger.warn(exception.message)
                     raise exception
 
-                new_player = Player(player_name)
+                new_player = Player(player_name, is_bot=False)
                 self.__players.append(new_player)
                 self.broadcast(self.get_game_state_event())
 
@@ -307,13 +308,20 @@ class Game:
             if self.__started:
                 raise GameAlreadyStartedException()
 
-            if len(self.__players) < MIN_PLAYER_CAPACITY:
+            rules = self.__rules
+
+            if len(self.__players) + rules["bot_count"] < MIN_PLAYER_CAPACITY:
                 raise NotEnoughPlayersException()
 
             # -- reset card piles --
             self.__draw_pile = create_deck()
             self.__discard_pile = []
             shuffle(self.__draw_pile)
+
+            # -- add bots --
+            for i in range(rules["bot_count"]):
+                bot_name = f"bot#{i + 1}"
+                self.__players.append(Player(bot_name, is_bot=True))
 
             # -- shuffle players if needed --
             if self.__rules["shuffle_players"]:
@@ -517,8 +525,11 @@ class Game:
             self.__lead_color = None
             self.__lead_card = None
 
-            for player in self.__players:
-                player.last_result = len(player.cards)
+            for player in self.__players.copy():
+                if player.is_bot:
+                    self.__players.remove(player)
+                else:
+                    player.last_result = len(player.cards)
 
             message = format_optional_operator(
                 "Game stopped",
@@ -550,34 +561,63 @@ class Game:
             with self.lock:
 
                 now = monotonic()
+                rules = self.__rules
 
                 player_timeout_seconds = PLAYER_TIMEOUT.total_seconds()
                 state_changed = False
 
-                for player in self.__players:
+                for player_index, player in enumerate(self.__players.copy()):
                     with player.lock:
 
-                        previous_connected_status = player.connected
+                        if player.is_bot:
 
-                        player.connected = False
-                        if player.subscription_token:
-                            if player.last_pending_timestamp:
-                                pending_time = now - player.last_pending_timestamp
-                                if pending_time < player_timeout_seconds:
-                                    player.connected = True
+                            player.connected = True
+
+                            bot_play_timer = player.bot_play_timer
+                            assert bot_play_timer
+
+                            if player_index != self.__current_player_index:
+                                bot_play_timer.started = False
                             else:
-                                player.connected = True
+                                if bot_play_timer.started:
+                                    if bot_play_timer.time_up:
+                                        assert self.__lead_color
+                                        assert self.__lead_card
+                                        play = player.bot_play(
+                                            lead_color=self.__lead_color,
+                                            lead_card=self.__lead_card,
+                                            skip_counter=self.__skip_counter,
+                                            rules=rules,
+                                        )
+                                        self.play(player.name, *play)
+                                        bot_play_timer.started = False
+                                else:
+                                    bot_play_timer.timeout = rules["bot_play_delay"]
+                                    bot_play_timer.started = True
 
-                        if player.connected != previous_connected_status:
-                            state_changed = True
-                            if not player.connected:
-                                self.__logger.info(
-                                    f"Disconnected from player#{player.name}. "
-                                    f"(subscription_token: {player.subscription_token})"
-                                )
-                                player.subscription_token = ""
-                                if not self.__started:
-                                    self.__players.remove(player)
+                        else:
+
+                            previous_connected_status = player.connected
+
+                            player.connected = False
+                            if player.subscription_token:
+                                if player.last_pending_timestamp:
+                                    pending_time = now - player.last_pending_timestamp
+                                    if pending_time < player_timeout_seconds:
+                                        player.connected = True
+                                else:
+                                    player.connected = True
+
+                            if player.connected != previous_connected_status:
+                                state_changed = True
+                                if not player.connected:
+                                    self.__logger.info(
+                                        f"Disconnected from player#{player.name}. "
+                                        f"(subscription_token: {player.subscription_token})"
+                                    )
+                                    player.subscription_token = ""
+                                    if not self.__started:
+                                        self.__players.remove(player)
 
                 if state_changed:
                     self.broadcast(self.get_game_state_event())

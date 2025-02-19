@@ -17,7 +17,7 @@ HEARTBEAT_GAP = timedelta(seconds=2)
 PLAYER_TIMEOUT = timedelta(seconds=5)
 
 # -- Game Config --
-GAME_WATCHER_INTERVAL = timedelta(seconds=2)
+GAME_WATCHER_INTERVAL = timedelta(seconds=1)
 GAME_WATCHER_SKIP_THRESHOLD: Final = 3
 
 # -- Player Config --

@@ -16,10 +16,16 @@ from typing import (
 
 from tuno.server.exceptions import ApiException
 from tuno.shared.constraints import (
+    DEFAULT_BOT_COUNT,
+    DEFAULT_BOT_PLAY_DELAY_SECONDS,
     DEFAULT_INITIAL_HAND_SIZE,
     DEFAULT_PLAYER_CAPACITY,
+    MAX_BOT_COUNT,
+    MAX_BOT_PLAY_DELAY_SECONDS,
     MAX_INITIAL_HAND_SIZE,
     MAX_PLAYER_CAPACITY,
+    MIN_BOT_COUNT,
+    MIN_BOT_PLAY_DELAY_SECONDS,
     MIN_INITIAL_HAND_SIZE,
     MIN_PLAYER_CAPACITY,
 )
@@ -137,6 +143,32 @@ class GameRules(TypedDict):
             default=True,
             hint="allow non-number card as last play",
             validator=None,
+        ),
+    ]
+
+    bot_count: Annotated[
+        int,
+        RuleMetadataWithoutType(
+            default=DEFAULT_BOT_COUNT,
+            hint=f"{MIN_BOT_COUNT}~{MAX_BOT_COUNT}",
+            validator=IntRangeRuleValidator(
+                "bot_count",
+                MIN_BOT_COUNT,
+                MAX_BOT_COUNT,
+            ),
+        ),
+    ]
+
+    bot_play_delay: Annotated[
+        float,
+        RuleMetadataWithoutType(
+            default=DEFAULT_BOT_PLAY_DELAY_SECONDS,
+            hint=f"{MIN_BOT_PLAY_DELAY_SECONDS}s~{MAX_BOT_PLAY_DELAY_SECONDS}s",
+            validator=FloatRangeRuleValidator(
+                "bot_play_delay",
+                MIN_BOT_PLAY_DELAY_SECONDS,
+                MAX_BOT_PLAY_DELAY_SECONDS,
+            ),
         ),
     ]
 
