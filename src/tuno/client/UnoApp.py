@@ -63,18 +63,18 @@ class UnoApp(App[object]):
         game_state = message.game_state
 
         if game_state:
-            if game_state["started"]:
-                await self.switch_mode("in-game")
-            else:
-                await self.switch_mode("pending")
-            for modal_screen in self.query(ModalScreen):
-                modal_screen.dismiss()
+            target_mode = "in-game" if game_state["started"] else "pending"
+            if self.current_mode != target_mode:
+                await self.switch_mode(target_mode)
+                for modal_screen in self.query(ModalScreen):
+                    modal_screen.dismiss()
         else:
             await self.switch_mode("connect")
 
-        if hasattr(self.screen, "game_state"):
-            setattr(self.screen, "game_state", game_state)
-            self.log.debug("Updated game state on current screen.")
+        for screen in self.screen_stack:
+            if hasattr(screen, "game_state"):
+                setattr(screen, "game_state", game_state)
+                self.log.debug(f"Updated game state on current {screen.name}.")
 
     @on(CardsUpdate)
     def on_cards_update(self, message: CardsUpdate) -> None:
