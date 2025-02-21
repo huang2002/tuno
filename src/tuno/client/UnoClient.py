@@ -42,19 +42,21 @@ class UnoClient:
         self.event_handler_map = load_event_handler_map()
 
     def get_connection_display(self) -> str:
-        with self.subscription_lock:
-            if self.subscription is None:
-                raise RuntimeError("Server not connected!")
-            assert self.player_name
-            assert self.server_address
-            return f"{self.player_name}@{self.server_address}"
+        assert self.player_name
+        assert self.server_address
+        return f"{self.player_name}@{self.server_address}"
 
-    def reset(self, message: str | None) -> None:
-
+    def close(self) -> bool:
         with self.subscription_lock:
             if self.subscription:
                 self.subscription.close()
                 self.subscription = None
+                return True
+        return False
+
+    def reset(self, message: str | None) -> None:
+
+        self.close()
 
         self.server_address = ""
         self.player_name = ""

@@ -51,11 +51,8 @@ class UnoApp(App[object]):
     def on_unmount(self) -> None:
         client = self.client
         assert client is not None
-        with client.subscription_lock:
-            if client.subscription:
-                client.subscription.close()
-                client.subscription = None
-                self.log.debug("Subscription detached.")
+        if client.close():
+            self.log.debug("Subscription detached.")
 
     @on(GameStateUpdate)
     async def on_game_state_update(self, message: GameStateUpdate) -> None:
