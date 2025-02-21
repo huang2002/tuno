@@ -34,6 +34,7 @@ from tuno.shared.sse_events import (
     NotificationEvent,
     ServerSentEvent,
 )
+from tuno.shared.ThreadLockContext import ThreadLockContext
 
 from .Player import Player
 
@@ -81,13 +82,13 @@ class Game:
         return self.__started
 
     def broadcast(self, event: ServerSentEvent) -> None:
-        with self.lock:
+        with ThreadLockContext(self.lock):
             for player in self.__players:
                 if not player.is_bot:
                     player.message_queue.put(event)
 
     def get_game_state_event(self) -> GameStateEvent:
-        with self.lock:
+        with ThreadLockContext(self.lock):
             started = self.__started
             return GameStateEvent(
                 GameStateEvent.DataType(
@@ -122,7 +123,7 @@ class Game:
         operator_is_player: bool,
     ) -> None:
 
-        with self.lock:
+        with ThreadLockContext(self.lock):
 
             if self.started:
                 debug_message = format_optional_operator(
@@ -173,7 +174,7 @@ class Game:
         player_name: str,
         allow_creation: bool = False,
     ) -> Player:
-        with self.lock:
+        with ThreadLockContext(self.lock):
 
             for player in self.__players:
                 if player.name == player_name:
@@ -204,7 +205,7 @@ class Game:
         operator_is_player: bool,
     ) -> None:
 
-        with self.lock:
+        with ThreadLockContext(self.lock):
 
             target_player = self.get_player(target_name)
             target_player.connected = False
@@ -237,7 +238,7 @@ class Game:
         *,
         lead_color: BasicCardColor | None = None,
     ) -> None:
-        with self.lock:
+        with ThreadLockContext(self.lock):
             if lead_card["type"] == "wild":
                 if lead_color is None:
                     raise InvalidLeadCardInfoException(lead_card, lead_color)
@@ -258,7 +259,7 @@ class Game:
 
         drawn_cards: Deck = []
 
-        with self.lock:
+        with ThreadLockContext(self.lock):
 
             for _ in range(count):
 
@@ -291,7 +292,7 @@ class Game:
                 drawn_cards.append(drawn_card)
 
             if player:
-                with player.lock:
+                with ThreadLockContext(player.lock):
                     player.cards.extend(drawn_cards)
                     player.message_queue.put(player.get_cards_event())
                 self.__logger.debug(
@@ -303,7 +304,7 @@ class Game:
         return drawn_cards
 
     def start(self, player_name: str) -> None:
-        with self.lock:
+        with ThreadLockContext(self.lock):
 
             if self.__started:
                 raise GameAlreadyStartedException()
@@ -375,7 +376,7 @@ class Game:
         card_ids: Sequence[str],
         play_color: BasicCardColor | None,
     ) -> None:
-        with self.lock:
+        with ThreadLockContext(self.lock):
 
             player = self.get_player(player_name)
             expected_player = self.__players[self.__current_player_index]
@@ -515,7 +516,7 @@ class Game:
         operator_is_player: bool,
         state_check_required: bool = True,
     ) -> None:
-        with self.lock:
+        with ThreadLockContext(self.lock):
 
             if state_check_required:
                 if not self.__started:
@@ -558,7 +559,7 @@ class Game:
                 )
 
         for _ in loop(GAME_WATCHER_INTERVAL, allow_skip=True, on_slow=on_slow):
-            with self.lock:
+            with ThreadLockContext(self.lock):
 
                 now = monotonic()
                 rules = self.__rules
@@ -567,7 +568,7 @@ class Game:
                 state_changed = False
 
                 for player_index, player in enumerate(self.__players.copy()):
-                    with player.lock:
+                    with ThreadLockContext(player.lock):
 
                         if player.is_bot:
 

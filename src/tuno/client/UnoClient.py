@@ -12,6 +12,7 @@ from tuno.client.event_handlers import EventHandlerMap, load_event_handler_map
 from tuno.client.utils.ApiContext import ApiContext
 from tuno.shared.deck import Deck
 from tuno.shared.sse_events import GameStateEvent
+from tuno.shared.ThreadLockContext import ThreadLockContext
 
 if TYPE_CHECKING:
     from tuno.client.UnoApp import UnoApp
@@ -47,7 +48,7 @@ class UnoClient:
         return f"{self.player_name}@{self.server_address}"
 
     def close(self) -> bool:
-        with self.subscription_lock:
+        with ThreadLockContext(self.subscription_lock):
             if self.subscription:
                 self.subscription.close()
                 self.subscription = None

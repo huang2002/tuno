@@ -21,6 +21,7 @@ from tuno.shared.sse_events import (
     GameStateEvent,
     SubscriptionChangeEvent,
 )
+from tuno.shared.ThreadLockContext import ThreadLockContext
 
 logger = Logger(__name__)
 
@@ -70,7 +71,7 @@ def setup(blueprint: Blueprint) -> None:
 
             # message loop
             for _ in loop(SUBSCRIPTION_LOOP_INTERVAL, on_slow=on_slow):
-                with player.lock:
+                with ThreadLockContext(player.lock):
 
                     for _ in range(MAX_MESSAGES_PER_LOOP):
 
@@ -131,7 +132,7 @@ def setup(blueprint: Blueprint) -> None:
 
         @response.call_on_close
         def on_close() -> None:
-            with player.lock:
+            with ThreadLockContext(player.lock):
                 if player.subscription_token == subscription_token:
                     player.subscription_token = ""
                     logger.info(

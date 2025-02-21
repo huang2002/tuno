@@ -5,6 +5,8 @@ from time import strftime
 
 import click
 
+from tuno.shared.ThreadLockContext import ThreadLockContext
+
 
 class LogLevel(IntEnum):
     DEBUG = 1
@@ -43,7 +45,7 @@ class Logger:
             + " "
             + content
         )
-        with self.lock:
+        with ThreadLockContext(self.lock):
             click.echo(message)
 
     debug = partialmethod(

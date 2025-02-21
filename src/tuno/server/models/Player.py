@@ -14,6 +14,7 @@ from tuno.shared.deck import BasicCardColor, Card, Deck, basic_card_colors
 from tuno.shared.LazyTimer import LazyTimer
 from tuno.shared.rules import GameRules
 from tuno.shared.sse_events import CardsEvent, ServerSentEvent
+from tuno.shared.ThreadLockContext import ThreadLockContext
 
 
 class Player:
@@ -60,7 +61,7 @@ class Player:
 
     @contextmanager
     def message_context(self) -> Generator[None]:
-        with self.lock:
+        with ThreadLockContext(self.lock):
             self.__last_pending_timestamp = monotonic()
             yield
             self.__last_pending_timestamp = None
@@ -78,7 +79,7 @@ class Player:
         cards_left: Deck = []
         cards_out: Deck = []
 
-        with self.lock:
+        with ThreadLockContext(self.lock):
 
             for card in self.cards:
                 if card["id"] in cards_ids_remaining:
@@ -102,7 +103,7 @@ class Player:
         skip_counter: int,
         rules: GameRules,
     ) -> tuple[list[str], BasicCardColor | None]:
-        with self.lock:
+        with ThreadLockContext(self.lock):
 
             candidates: list[tuple[list[str], BasicCardColor | None]] = []
             for card in self.cards:
