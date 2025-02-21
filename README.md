@@ -39,4 +39,5 @@ hatch build
 ## Links
 
 - [Github Repo](https://github.com/huang2002/tuno)
+- [Changelog](./CHANGELOG.md)
 - [LICENSE (ISC)](./LICENSE)
